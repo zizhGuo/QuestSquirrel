@@ -1,0 +1,26 @@
+results/request_1_2/iter_3/finish/2023/11/07/11_16_task_4/cmd.txt
+results/request_1_2/iter_3/finish/2023/11/06/20_15_task5/cmd.txt
+results/*
+logs/*
+
+query_devs/*
+
+src/models/__pycache__/*
+*.pyc
+# *.ipynb
+*.vscode/
+*.zip
+*.html
+*.xlsx
+*.csv
+docs/
+*.rst
+*.docx
+config_quest_1_2_copy.yaml
+*.spec
+*.toc
+*.pyz
+build/
+dist/
+__pycache__/
+*.json
