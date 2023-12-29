@@ -33,16 +33,21 @@ class HiveConnector:
             print(e)
             return
 
-    def query_data(self, query, save_to_file=False, save_file_name = 'temp.csv'):
+    def query_data(self, query, save_to_file=False, save_file_name = 'temp.csv', fetch_result = 1):
         try:
             # 执行查询
-            print('query: {}'.format(query))
+            # print('query: {}'.format(query))
             cursor = self.conn.cursor()
             cursor.execute(query)
-            results = cursor.fetchall()
-            columns=[desc[0] for desc in cursor.description]
-            print(columns)
-            df = pd.DataFrame(results, columns=columns)
+            if fetch_result:
+                results = cursor.fetchall()
+                columns=[desc[0] for desc in cursor.description]
+                print(columns)
+                df = pd.DataFrame(results, columns=columns)
+            else:
+                # df = None
+                # create an empty dataframe
+                df = pd.DataFrame(columns=['col1','col2'])
             if save_to_file:
                 self.save_data(df, save_file_name)
         except Exception as e:

@@ -15,6 +15,7 @@ class Flag:
             self.visual = config['visual']
             self.read_from_file_visual = config['read_from_file_visual']
             self.email = config['email']
+            self.load_tasks = config['load_tasks']
         except Exception as e:
             print('Flag inside init failed.')
             print(e)

@@ -1,0 +1,267 @@
+connector:
+  host: "172.19.121.24"
+  port: "10000"
+  hive_conf:
+    "hive.resultset.use.unique.column.names": "false"
+  username: "hadoop"
+  password: "hadoop"
+  auth: "CUSTOM"
+  temp_save_path: "data/temp"
+
+email:
+  # message: "测试QuestSquirrel"
+  message: "当此女神赐福推送日期：xxxx年xx月xx日; 对比上一次推送日期：xxxx年xx月xx日; 今日为推送日后第x日; 今日邮件包含：; 7日数据报表：新增第x日; 对比报表：有; 可视化辅助：有"
+  subject: "女神赐福限时活动推送报表（推送批次xxxx年xx月xx日）"
+  header_from: "郭子谆"
+  sender_email: "guozizhun@cxxmobi.com"
+  # header_to: "屠林超, 黄琎晶"
+  header_to: "郭某测试"
+  recipient_show: "huangjinjing@cxxmobi.com"
+  cc_show: "guozizhun@cxxmobi.com, 464096202@qq.com"
+  # cc_show: ""
+  user: "guozizhun@cxxmobi.com"
+  password: "SMBz75e5chpJzsr2"
+  to_addrs: "464096202@qq.com, guozizhun@cxxmobi.com"
+  # to_addrs: "tulinchao@cxxmobi.com, huangjinjing@cxxmobi.com"
+  email_company: "qq"
+  read_file_name: 'result'
+  report_save_path: "data/results"
+  send_file_name: '第一版充值类数据统计日报优化'
+  send_visual_name: '可视化补充'
+
+mapper:
+  files2sheets:
+    "batchcompare.csv": ["sheet1", "sheet2"]
+    "visual1.csv": ["sheet3"]
+    "visual2.csv": ["sheet4"]
+    "visual3.csv": ["sheet5"]
+
+query:
+  template_names: [
+      'step1_push_overwrite'
+      ,'step2_task_1_1'
+      ,'step2_task_1_2'
+      ,'step2_task_2'
+      ,'step2_task_3'
+      ,'step2_task_4_1'
+      ,'step2_task_4_2'
+      ,'visual_part_1_1'
+      ,'visual_part_1_2'
+      ,'visual_part_2'
+      ]
+  info:
+    req_cat: "request_2_1"
+    req_iter: "iter_3"
+    req_status: "dev"
+  params:
+    db_read: "b1_statistics"
+    db_write: "guozizhun"
+    start_date: "2023-12-22"
+    start_dt: "20231222"
+    last_start_dt: "20231216"
+    start_dt_plus_8: '20231230'
+    dt_mon: "202312"
+
+report:
+  report_name: 'result'
+  visual_name: 'visual.html'
+  output_dir: "data/results_god"
+  output_tasks: ['']
+  final_visual_name: '可视化补充'
+
+flag:
+  hivequery: 1
+  load_tasks: 1
+  dataprocess: 0
+  read_from_file_dataprocess: 0
+  visual: 0
+  read_from_file_visual: 1
+  reportgenerate: 1
+  running_tasks: [
+      'step1_push_overwrite'
+      ,'step2_task_1_1'
+      ,'step2_task_1_2'
+      ,'step2_task_2'
+      ,'step2_task_3'
+      ,'step2_task_4_1'
+      ,'step2_task_4_2'
+      ,'visual_part_1_1'
+      ,'visual_part_1_2'
+      ,visual_part_2'
+      ]
+  logging: 0
+  email: 0
+
+task:
+  step1_push_overwrite:
+    hive_query:
+      template_name: "step1_push_overwrite"
+      read_from_file: 0
+      save_to_file: 0
+      save_file_name: "na.csv"
+      fetch_result: 0
+    data_process:
+      strategy_name: "StrategyA"
+      read_from_file: 0
+      save_to_file: 1
+      temp_save_path: "data/temp_god"
+      read_file_name: "na.csv"
+      save_file_name: "na.csv"
+    report_generate:
+      sheet_name: "na"
+
+  step2_task_1_1:
+    hive_query:
+      template_name: "step2_task_1_1"
+      read_from_file: 0
+      save_to_file: 0
+      save_file_name: "temp_step2_task_1_1.csv"
+      fetch_result: 1
+    data_process:
+      strategy_name: "StrategyA"
+      read_from_file: 0
+      save_to_file: 1
+      temp_save_path: "data/temp_god"
+      read_file_name: "temp_step2_task_1_1.csv"
+      save_file_name: "processed_step2_task_1_1.csv"
+    report_generate:
+      sheet_name: "sheet1"
+  
+  step2_task_1_2:
+    hive_query:
+      template_name: "step2_task_1_2"
+      read_from_file: 0
+      save_to_file: 0
+      save_file_name: "temp_step2_task_1_2.csv"
+      fetch_result: 1
+    data_process:
+      strategy_name: "StrategyA"
+      read_from_file: 0
+      save_to_file: 1
+      temp_save_path: "data/temp_god"
+      read_file_name: "temp_step2_task_1_2.csv"
+      save_file_name: "processed_step2_task_1_2.csv"
+    report_generate:
+      sheet_name: "sheet1"
+
+  step2_task_2:
+    hive_query:
+      template_name: "step2_task_2"
+      read_from_file: 0
+      save_to_file: 0
+      save_file_name: "temp_step2_task_2.csv"
+      fetch_result: 1
+    data_process:
+      strategy_name: "StrategyA"
+      read_from_file: 0
+      save_to_file: 1
+      temp_save_path: "data/temp_god"
+      read_file_name: "temp_step2_task_2.csv"
+      save_file_name: "processed_step2_task_2.csv"
+    report_generate:
+      sheet_name: "sheet1"
+
+  step2_task_3:
+    hive_query:
+      template_name: "step2_task_3"
+      read_from_file: 0
+      save_to_file: 0
+      save_file_name: "temp_step2_task_3.csv"
+      fetch_result: 1
+    data_process:
+      strategy_name: "StrategyA"
+      read_from_file: 0
+      save_to_file: 1
+      temp_save_path: "data/temp_god"
+      read_file_name: "temp_step2_task_3.csv"
+      save_file_name: "processed_step2_task_3.csv"
+    report_generate:
+      sheet_name: "sheet1"
+
+  step2_task_4_1:
+    hive_query:
+      template_name: "step2_task_4_1"
+      read_from_file: 0
+      save_to_file: 0
+      save_file_name: "temp_step2_task_4_1.csv"
+      fetch_result: 1
+    data_process:
+      strategy_name: "StrategyA"
+      read_from_file: 0
+      save_to_file: 1
+      temp_save_path: "data/temp_god"
+      read_file_name: "temp_step2_task_4_1.csv"
+      save_file_name: "processed_step2_task_4_1.csv"
+    report_generate:
+      sheet_name: "sheet2"
+
+  step2_task_4_2:
+    hive_query:
+      template_name: "step2_task_4_2"
+      read_from_file: 0
+      save_to_file: 0
+      save_file_name: "temp_step2_task_4_2.csv"
+      fetch_result: 1
+    data_process:
+      strategy_name: "StrategyA"
+      read_from_file: 0
+      save_to_file: 1
+      temp_save_path: "data/temp_god"
+      read_file_name: "temp_step2_task_4_2.csv"
+      save_file_name: "processed_step2_task_4_2.csv"
+    report_generate:
+      sheet_name: "sheet2"
+
+  visual_part_1_1:
+    hive_query:
+      template_name: "visual_part_1_1"
+      read_from_file: 0
+      save_to_file: 0
+      save_file_name: "temp_visual_part_1_1.csv"
+      fetch_result: 1
+    data_process:
+      strategy_name: "StrategyA"
+      read_from_file: 0
+      save_to_file: 1
+      temp_save_path: "data/temp_god"
+      read_file_name: "temp_visual_part_1_1.csv"
+      save_file_name: "processed_visual_part_1_1.csv"
+    report_generate:
+      sheet_name: "sheet3"
+
+  visual_part_1_2:
+    hive_query:
+      template_name: "visual_part_1_2"
+      read_from_file: 0
+      save_to_file: 0
+      save_file_name: "temp_visual_part_1_2.csv"
+      fetch_result: 1
+    data_process:
+      strategy_name: "StrategyA"
+      read_from_file: 0
+      save_to_file: 1
+      temp_save_path: "data/temp_god"
+      read_file_name: "temp_visual_part_1_2.csv"
+      save_file_name: "processed_visual_part_1_2.csv"
+    report_generate:
+      sheet_name: "sheet4"
+
+  visual_part_2:
+    hive_query:
+      template_name: "visual_part_2"
+      read_from_file: 0
+      save_to_file: 0
+      save_file_name: "temp_visual_part_2.csv"
+      fetch_result: 1
+    data_process:
+      strategy_name: "StrategyA"
+      read_from_file: 0
+      save_to_file: 1
+      temp_save_path: "data/temp_god"
+      read_file_name: "temp_visual_part_2.csv"
+      save_file_name: "processed_visual_part_2.csv"
+    report_generate:
+      sheet_name: "sheet5"
+
+log:
+  log_name: 'log_'

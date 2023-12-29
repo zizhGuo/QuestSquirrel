@@ -33,6 +33,23 @@ class ReportGenerator:
             print(e)
             return
     
+    def generate_god_batch(self, df_write, sheet_name, mapper, write_xlsx):
+        tables = {}
+        for sheet_df in zip(sheet_name, df_write):
+            if sheet_df[0] == 'na':
+                continue
+            if not tables.get(sheet_df[0]):
+                tables[sheet_df[0]] = [sheet_df[1]]
+            else:
+                tables[sheet_df[0]].append(sheet_df[1])
+        assert mapper.get('files2sheets') is not None, 'files2sheets is not existed'
+        for file, sheet_list in mapper['files2sheets'].items():
+            tables_new = {}
+            for sheet in sheet_list:
+                tables_new[sheet] = tables[sheet]
+            write_xlsx(tables_new, self.root_path, self.output_dir, file)
+
+
     def generate_visual(self, visual_write):
         """ 
         # list of pages
