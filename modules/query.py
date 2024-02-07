@@ -56,3 +56,18 @@ class QueryManager:
     
     def test_get_query(self):
         return self.query_runs
+
+class QueryManager_manual:
+    def __init__(self):
+        print('creating QueryManager_manual')
+    
+    def get_sql_run(self, sql:str):
+        sql_run = self._process_query(sql)
+        return sql_run
+
+    def _process_query(self, query):
+        import re
+        query = query.replace('\n', ' ')  # Remove newline characters
+        query = re.sub(r'\s+', ' ', query)  # Replace multiple whitespaces with a single whitespace
+        # query = re.sub('`', r'\`', query)
+        return query

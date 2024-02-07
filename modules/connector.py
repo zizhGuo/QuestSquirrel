@@ -50,10 +50,10 @@ class HiveConnector:
                 df = pd.DataFrame(columns=['col1','col2'])
             if save_to_file:
                 self.save_data(df, save_file_name)
+            return df
         except Exception as e:
             print('Create dataframe failed.')
             print(e)
-        return df
         
     
     def save_data(self, df, save_file_name):

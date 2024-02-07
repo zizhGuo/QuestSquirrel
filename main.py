@@ -49,6 +49,21 @@ def main():
             if date.day < 10:
                 return f"{date.year}{date.month}0{date.day}"
             return f"{date.year}{date.month}{date.day}"
+    
+    def date2str(date, timestamp_format=False):
+        if date.month < 10:
+            month = f"0{date.month}"
+        else:
+            month = f"{date.month}"
+        if date.day < 10:
+            day = f"0{date.day}"
+        else:
+            day = f"{date.day}"
+        if timestamp_format:
+            return f"{date.year}-{month}-{day}"
+        else:
+            return f"{date.year}{month}{day}"
+
     end_dt = date2str(datetime.strptime(args.end_dt, "%Y-%m-%d"))
     end_date = date2str(datetime.strptime(args.end_dt, "%Y-%m-%d"), timestamp_format = True)
     start_dt = date2str(datetime.strptime(args.end_dt, "%Y-%m-%d") - timedelta(days=7))
@@ -63,7 +78,8 @@ def main():
     config['query']['params']['end_date'] = end_date
     config['query']['params']['pre_start_dt'] = pre_start_dt
     config['query']['params']['pre_start_date'] = pre_start_date
-
+    # print above config
+    print(config['query']['params'])
 
     scheduler = TaskScheduler(config = config, root_path = CURRENT_FILE_DIR, date = end_dt)
     scheduler.run_task()

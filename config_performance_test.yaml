@@ -1,0 +1,10 @@
+connector:
+  host: "172.19.121.24"
+  port: "10000"
+  hive_conf:
+    "hive.resultset.use.unique.column.names": "false"
+    # "hive.execution.engine": "spark"
+  username: "hadoop"
+  password: "hadoop"
+  auth: "CUSTOM"
+  temp_save_path: "data/temp"
