@@ -77,18 +77,6 @@ flag:
   visual: 0
   read_from_file_visual: 1
   reportgenerate: 1
-  running_tasks: [
-      'step1_push_overwrite'
-      ,'step2_task_1_1'
-      ,'step2_task_1_2'
-      ,'step2_task_2'
-      ,'step2_task_3'
-      ,'step2_task_4_1'
-      ,'step2_task_4_2'
-      ,'visual_part_1_1'
-      ,'visual_part_1_2'
-      ,visual_part_2'
-      ]
   logging: 0
   email: 0
 

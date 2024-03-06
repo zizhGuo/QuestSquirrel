@@ -11,6 +11,8 @@ class HiveConnector:
         # self.task_name = config['task_name']
         # self.pipeline_name = config['pipeline']
         self.root_path = root_path
+        self.end_dt = config['end_dt']
+        self.start_dt = config['start_dt']
         
         # connector
         self.host = config['connector']['host']
@@ -35,29 +37,35 @@ class HiveConnector:
             print(e)
             return
 
-    def query_and_save(self, queries, i, tables):
+    def query_and_save(self, queries, template_names, i, tables):
         print('enter query_and_save')
-        query = queries[i]
+        query = queries[template_names[i]]
         table_name = tables[i]
         if query == 'na':
             return
         try:
             # start time
-            time_start = time.now()
+            time_start = time.time()
 
             cursor = self.conn.cursor()
-            cursor.execute(query)
-            results = cursor.fetchall()
-            columns=[desc[0] for desc in cursor.description]
-            # print(columns)
             print(f'Query No: {i}')
-            # print current time
-            time_end = time.now()
-            print('results: {}'.format(results))
-            print(f'Time Spent: {time_end - time_start}')
+            cursor.execute(query)
 
-            df = pd.DataFrame(results, columns=columns)
-            self.save_data(df, table_name)
+            if tables[i] != 'na':
+                results = cursor.fetchall()
+                columns=[desc[0] for desc in cursor.description]
+                df = pd.DataFrame(results, columns=columns)
+                # print(columns)
+                # print current time
+                time_end = time.time()
+                print('results in df: {}'.format(df))
+                print(f'Time Spent: {time_end - time_start}s')
+
+                df = pd.DataFrame(results, columns=columns)
+                self.save_data(df, table_name)
+            else:
+                print('No table to save to.')
+                
         except Exception as e:
             if e == 'No result set to fetch from.':
                 print('No result set to fetch from.')
@@ -91,8 +99,13 @@ class HiveConnector:
     
     def save_data(self, df, save_file_name):
         try:
-            file = os.path.join(self.root_path, self.temp_save_path)+'/'+save_file_name
-            df.to_csv(file, index=False)
+            dir_path = os.path.join(self.root_path, self.temp_save_path, self.end_dt)
+            file_path = os.path.join(dir_path, save_file_name)
+            # file = os.path.join(self.root_path, self.temp_save_path)+'/'+ self.end_dt + '/'+save_file_name
+            os.makedirs(dir_path, exist_ok=True)
+            
+            df.to_excel(file_path, index=False, engine='openpyxl')
+            # df.to_csv(file, index=False)
             print('Save data successfully.')
         except Exception as e:
             print('Save data failed.')

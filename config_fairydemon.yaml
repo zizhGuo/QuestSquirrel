@@ -1,0 +1,87 @@
+connector:
+  host: "172.19.121.24"
+  port: "10000"
+  hive_conf:
+    "hive.resultset.use.unique.column.names": "false"
+    "hive.execution.engine": "spark"
+    "spark.executor.instances": "6"
+    "spark.executor.cores": "8"
+    "spark.driver.cores": "8"
+  username: "hadoop"
+  password: "hadoop"
+  auth: "CUSTOM"
+  temp_save_path: "data/quest_fairydemon"
+
+query:
+  tasks_num: 9
+  template_names: ['lv1_user_list_push', 'dws_mall_task1', 'dws_mall_task2' ,'dws_mall_task3' ,'dws_mall_task4', 'dws_envir_task1', 'dws_envir_task2', 'dws_envir_task3', 'dws_envir_task4']
+  table_format: ['xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx']
+  tables: ['na', 'dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx', 'dws_envir_task1.xlsx', 'dws_envir_task2.xlsx', 'dws_envir_task3.xlsx', 'dws_envir_task4.xlsx']
+  info:
+    req_cat: "request_5_1"
+    req_iter: "iter_2"
+    req_status: "dev"
+  params:
+    NA: "NA"
+
+excel:
+  output_file: 'output.xlsx'
+  worksheet: ['ws1', 'ws2', 'ws3', 'ws4', 'ws5', 'ws6', 'ws7', 'ws7']
+  ws2title:
+    ws1: '仙魔大陆各模块数据大盘'
+    ws2: '仙魔大陆各礼包模块'
+    ws3: '仙魔各礼包ID TOP10礼包'
+    ws4: '仙魔各模块中礼包ID TOP10礼包'
+    ws5: '每日各境界人数分布情况'
+    ws6: '境界突破情况分布'
+    ws7: '仙魔大陆渔场消耗'
+  column: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6', 'col7', 'col8']
+  col2names:
+    col1: ['日期', '模块名称', '点券兑换订单数', '点券兑换金额', '仙魔大陆整体订单占比', '仙魔大陆整体金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+    col2: ['日期', '模块名称', '礼包类型', '兑换订单数', '兑换金额', '模块订单占比', '模块兑换金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+    col3: ['日期' ,'序号' ,'礼包名称' ,'礼包类型' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
+    col4: ['日期' ,'模块名称' ,'序号' ,'礼包名称' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
+    col5: ['日期', '境界等级', '境界人数', '各境界人数与前一日对比']
+    col6: ['日期', '境界等级', '经历过对应境界等级总人数', '类型', '操作总次数', '操作总人数']
+    col7: ['日期' ,'总游戏人数' ,'人均游戏时长（分钟）' ,'与前一日对比' ,'总消耗金币' ,'与前一日对比' ,'净分']
+    col8: ['日期' ,'渔场名称' ,'渔场游戏人数' ,'人均游戏时长（分钟）' ,'与前一日对比' ,'总消耗金币' ,'消耗金币占比' ,'与前一日对比' ,'净分']
+  style: ['general', 'general', 'general', 'general', 'general', 'general', 'general', 'general']
+  style_setting:
+    general:
+      header: 
+        font: 'Bold'
+        border: 'Medium'
+        align: 'Center'
+      cell:
+        font: 'Regular'
+        border: 'Thin'
+        align: 'Center'
+
+visual:
+  vis1:
+    output_file: 'output_visual.html'
+    template: 'visual_5_1_1'
+    files: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
+
+
+email:
+  # message: "测试QuestSquirrel"
+  message: "附件包含报表及补充图示"
+  subject: "仙魔大陆商城&生态日报"
+  header_from: "郭子谆"
+  sender_email: "guozizhun@cxxmobi.com"
+  # header_to: "屠林超, 黄琎晶"
+  header_to: "header_to 测试"
+  recipient_show: "huangjinjing@cxxmobi.com"
+  cc_show: "guozizhun@cxxmobi.com, 464096202@qq.com"
+  # cc_show: ""
+  user: "guozizhun@cxxmobi.com"
+  password: "SMBz75e5chpJzsr2"
+  to_addrs: "464096202@qq.com, guozizhun@cxxmobi.com"
+  # to_addrs: "tulinchao@cxxmobi.com, huangjinjing@cxxmobi.com"
+  email_company: "qq"
+  read_file: ['output', 'output_visual']
+  read_file_format: ['xlsx', 'html']
+  # report_save_path: "data/results"
+  send_file: ['仙魔大陆商城&生态日报', '仙魔大陆商城图示']
+  send_file_format: ['xlsx', 'html']
