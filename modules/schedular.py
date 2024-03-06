@@ -1,4 +1,4 @@
-from modules.connector import HiveConnector
+from modules_fairyland.connector import HiveConnector
 from modules.query import QueryManager
 from modules.processor import DataProcessor
 from modules.visualizer import Visualizer

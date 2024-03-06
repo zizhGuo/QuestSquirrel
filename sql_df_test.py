@@ -6,7 +6,7 @@ sys.path.insert(0, CURRENT_FILE_DIR)
 sys.path.insert(1, PARENT_DIR)
 
 from modules.query import QueryManager_manual
-from modules.connector import HiveConnector
+from modules_fairyland.connector import HiveConnector
 from modules.config import ConfigManager
 
 import pandas as pd

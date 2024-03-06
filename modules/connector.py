@@ -1,9 +1,11 @@
 import os
 from pyhive import hive
 import pandas as pd
+import time
 
 class HiveConnector:
     def __init__(self, config, root_path):
+        print('enter HiveConnector init.')
         self.config = config
         assert self.config is not None, "Config connector is None"
         # self.task_name = config['task_name']
@@ -11,13 +13,13 @@ class HiveConnector:
         self.root_path = root_path
         
         # connector
-        self.host = config['host']
-        self.port = config['port']
-        self.hive_conf = config['hive_conf']
-        self.username = config['username']
-        self.password = config['password']
-        self.auth = config['auth']
-        self.temp_save_path = config['temp_save_path']
+        self.host = config['connector']['host']
+        self.port = config['connector']['port']
+        self.hive_conf = config['connector']['hive_conf']
+        self.username = config['connector']['username']
+        self.password = config['connector']['password']
+        self.auth = config['connector']['auth']
+        self.temp_save_path = config['connector']['temp_save_path']
         try:
             self.conn = hive.Connection(host=self.host, 
                                    port= self.port,
@@ -32,6 +34,37 @@ class HiveConnector:
             print('Connection failed.')
             print(e)
             return
+
+    def query_and_save(self, queries, i, tables):
+        print('enter query_and_save')
+        query = queries[i]
+        table_name = tables[i]
+        if query == 'na':
+            return
+        try:
+            # start time
+            time_start = time.now()
+
+            cursor = self.conn.cursor()
+            cursor.execute(query)
+            results = cursor.fetchall()
+            columns=[desc[0] for desc in cursor.description]
+            # print(columns)
+            print(f'Query No: {i}')
+            # print current time
+            time_end = time.now()
+            print('results: {}'.format(results))
+            print(f'Time Spent: {time_end - time_start}')
+
+            df = pd.DataFrame(results, columns=columns)
+            self.save_data(df, table_name)
+        except Exception as e:
+            if e == 'No result set to fetch from.':
+                print('No result set to fetch from.')
+                return
+            print('Create dataframe failed.')
+            print(e)
+
 
     def query_data(self, query, save_to_file=False, save_file_name = 'temp.csv', fetch_result = 1):
         try:
