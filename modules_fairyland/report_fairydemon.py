@@ -91,26 +91,24 @@ def add_dataframe_to_worksheet(ws, df, start_row):
         ws.column_dimensions[column_cells[0].column_letter].width = length
 
 
-
 class ReportGenerator:
-    def __init__(self, config, root_path):
-        self.tables = config['query']['tables']
+    def __init__(self, config, root_path, module):
+        self.module = module
+        self.tables = config[module.report_module]['source_tables']
         # filter out the 'na' tables
-        self.tables = [table for table in self.tables if table != 'na']
+        # self.tables = [table for table in self.tables if table != 'na']
         self.num_tables = len(self.tables)
-        self.output_dir = config['excel']['output_file']
-        self.worksheet = config['excel']['worksheet']
-        self.ws2title = config['excel']['ws2title']
-        self.column = config['excel']['column']
-        self.col2names = config['excel']['col2names']
-        self.style = config['excel']['style']
-        self.style_setting = config['excel']['style_setting']
+        self.output_dir =  config[module.report_module]['output_file']
+        self.worksheet =  config[module.report_module]['worksheet']
+        self.ws2title =  config[module.report_module]['ws2title']
+        self.column =  config[module.report_module]['column']
+        self.col2names =  config[module.report_module]['col2names']
+        self.style =  config[module.report_module]['style']
+        self.style_setting =  config[module.report_module]['style_setting']
         self.root_path = root_path
-        self.temp_save_path = config['connector']['temp_save_path']
+        self.temp_save_path = config[module.connector_module]['temp_save_path']
         self.end_dt = config['end_dt']
-
-
-
+ 
     def run(self):
         wb = Workbook()
         wb.remove(wb.active)  # 移除初始的空worksheet

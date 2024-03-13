@@ -14,12 +14,12 @@ connector:
 
 email:
   # message: "测试QuestSquirrel"
-  message: "当此女神赐福推送日期：xxxx年xx月xx日; 对比上一次推送日期：xxxx年xx月xx日; 今日为推送日后第x日; 今日邮件包含：; 7日数据报表：新增第x日; 对比报表：有; 可视化辅助：有"
-  subject: "女神赐福限时活动推送报表（推送批次xxxx年xx月xx日）"
+  message: "附件包含报表及补充图示"
+  subject: "仙魔大陆商城&生态日报"
   header_from: "郭子谆"
   sender_email: "guozizhun@cxxmobi.com"
   # header_to: "屠林超, 黄琎晶"
-  header_to: "郭某测试"
+  header_to: "header_to 测试"
   recipient_show: "huangjinjing@cxxmobi.com"
   cc_show: "guozizhun@cxxmobi.com, 464096202@qq.com"
   # cc_show: ""
@@ -28,10 +28,11 @@ email:
   to_addrs: "464096202@qq.com, guozizhun@cxxmobi.com"
   # to_addrs: "tulinchao@cxxmobi.com, huangjinjing@cxxmobi.com"
   email_company: "qq"
-  read_file_name: 'result'
-  report_save_path: "data/results"
-  send_file_name: '第一版充值类数据统计日报优化'
-  send_visual_name: '可视化补充'
+  read_file: ['output', 'output_visual']
+  read_file_format: ['xlsx', 'html']
+  # report_save_path: "data/results"
+  send_file: ['仙魔大陆商城&生态日报', '仙魔大陆商城图示']
+  send_file_format: ['xlsx', 'html']
 
 query:
   tasks_num: 8
