@@ -11,11 +11,10 @@ where
   and circtype = 'fairy.demon.practice.lv.reward'
 )
 
-insert overwrite table guozizhun.dwd_2d_fairy_demon_land_daily_lv1_users
- 
+insert overwrite table guozizhun.dwd_2d_fairy_demon_land_daily_lv1_users_validation_2
 PARTITION (dt = '{end_dt}')
 select
-  uid
+  distinct uid
 from
   A
 where

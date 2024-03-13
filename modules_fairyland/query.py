@@ -1,10 +1,11 @@
 class QueryManager:
-    def __init__(self, config, root_path, param_dt):
+    def __init__(self, config, root_path, param_dt, module):
         assert config is not None, "Config is None"
         print('enter QueryManager init.')
         try:
-            self.template_names = config['query']['template_names']
-            self.info = config['query']['info']
+            
+            self.template_names = config[module.query_module]['template_names']
+            self.info = config[module.query_module]['info']
             # self.parameters = config['params']
             self.parameters = param_dt
             self.root_path = root_path

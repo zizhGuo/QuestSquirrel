@@ -19,24 +19,25 @@ from typing import List
 
 class Email:
     # def __init__(self, message, subject, header_from, header_to, sender_email, recipient_show, cc_show, user, password, to_addrs, email_company, attch_root_dir, output_file_name):
-    def __init__(self, config: dict, root_path):
+    def __init__(self, config: dict, root_path, module):
         # self.email_config = config
-        self.message = config['email']['message']
-        self.subject = config['email']['subject']
-        self.header_from = config['email']['header_from']
-        self.sender_email = config['email']['sender_email']
-        self.header_to = config['email']['header_to']
-        self.recipient_show = config['email']['recipient_show']
-        self.cc_show = config['email']['cc_show']
-        self.user = config['email']['user']
-        self.password = config['email']['password']
-        self.to_addrs = config['email']['to_addrs']
-        self.email_company = config['email']['email_company']
+        self.module = module
+        self.message = config[module.email_module]['message']
+        self.subject = config[module.email_module]['subject']
+        self.header_from = config[module.email_module]['header_from']
+        self.sender_email = config[module.email_module]['sender_email']
+        self.header_to = config[module.email_module]['header_to']
+        self.recipient_show = config[module.email_module]['recipient_show']
+        self.cc_show = config[module.email_module]['cc_show']
+        self.user = config[module.email_module]['user']
+        self.password = config[module.email_module]['password']
+        self.to_addrs = config[module.email_module]['to_addrs']
+        self.email_company = config[module.email_module]['email_company']
         
         # init report result directory
-        self.temp_save_path = config['connector']['temp_save_path']
-        self.read_file = config['email']['read_file']
-        self.read_file_format = config['email']['read_file_format']
+        self.temp_save_path = config[module.connector_module]['temp_save_path']
+        self.read_file = config[module.email_module]['read_file']
+        self.read_file_format = config[module.email_module]['read_file_format']
 
         self.root_path = root_path
         self.end_dt = config['end_dt']
@@ -44,9 +45,9 @@ class Email:
         # init email sending report name
 
         # dt = '20231213'
-        self.send_file = config['email']['send_file']
+        self.send_file = config[module.email_module]['send_file']
         # self.send_file_name = '{}_{}.xlsx'.format(self.send_file_name, dt)
-        self.send_file_format = config['email']['send_file_format']
+        self.send_file_format = config[module.email_module]['send_file_format']
         # self.send_visual_name = '{}_{}.html'.format(self.send_visual_name, dt)
     
     def _get_attachment_path(self):

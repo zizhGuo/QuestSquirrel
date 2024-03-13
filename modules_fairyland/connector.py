@@ -4,8 +4,9 @@ import pandas as pd
 import time
 
 class HiveConnector:
-    def __init__(self, config, root_path):
+    def __init__(self, config, root_path, module):
         print('enter HiveConnector init.')
+        self.module = module
         self.config = config
         assert self.config is not None, "Config connector is None"
         # self.task_name = config['task_name']
@@ -15,13 +16,13 @@ class HiveConnector:
         self.start_dt = config['start_dt']
         
         # connector
-        self.host = config['connector']['host']
-        self.port = config['connector']['port']
-        self.hive_conf = config['connector']['hive_conf']
-        self.username = config['connector']['username']
-        self.password = config['connector']['password']
-        self.auth = config['connector']['auth']
-        self.temp_save_path = config['connector']['temp_save_path']
+        self.host = config[module.connector_module]['host']
+        self.port = config[module.connector_module]['port']
+        self.hive_conf = config[module.connector_module]['hive_conf']
+        self.username = config[module.connector_module]['username']
+        self.password = config[module.connector_module]['password']
+        self.auth = config[module.connector_module]['auth']
+        self.temp_save_path = config[module.connector_module]['temp_save_path']
         try:
             self.conn = hive.Connection(host=self.host, 
                                    port= self.port,

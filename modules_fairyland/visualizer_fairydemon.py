@@ -176,6 +176,9 @@ class visual_5_1_1(VisualGraph):
 
     def gen(self, PARAMS):
         page = Page()
+
+        # task 1
+
         _df = pd.read_excel(PARAMS['dws_mall_task1'])
         _df = _df.fillna(0)
         _df['func_name'] = _df['func_name'].astype(str)
@@ -192,10 +195,11 @@ class visual_5_1_1(VisualGraph):
             ,'non_welfare_exchange_orders_ratio_diff': 'orders_diff_ratio'
             ,'non_welfare_exchange_cost_ratio_diff': 'cost_diff_ratio'
         })
+        _df
         # select _df when dt == '20240226'
-        _df = _df[_df['dt'] == PARAMS['dt_T']]
+        _df = _df[_df['dt'] == PARAMS['dt_T']].sort_values(by='cost', ascending=False)
         data = _df[['func_name'
-                    ,'orders'
+                    ,'cost'
                     ]]
         addtion = _df[['func_name'
                     ,'orders'
@@ -208,10 +212,10 @@ class visual_5_1_1(VisualGraph):
                     ,'cost_diff_ratio'
                     ]]
 
-        data['func_name_with_cost'] = addtion.apply(lambda row: f"{row['func_name']}|{row['cost']}", axis=1)
+        data['func_name_with_orders'] = addtion.apply(lambda row: f"{row['func_name']}|{row['orders']}", axis=1)
 
         pie = Pie()
-        pie_data = list(data[['func_name_with_cost', 'orders']].itertuples(index=False, name=None))
+        pie_data = list(data[['func_name_with_orders', 'cost']].itertuples(index=False, name=None))
         pie_data
         pie.add(
             series_name="",
@@ -221,27 +225,29 @@ class visual_5_1_1(VisualGraph):
             rosetype="radius",
         )
         pie.set_global_opts(
-            title_opts=opts.TitleOpts(title=f"仙魔大陆各模块数据大盘兑换订单占比 - 日期：{PARAMS['dt_T']}"),
+            title_opts=opts.TitleOpts(title=f"仙魔大陆各模块数据大盘兑换金额占比 - 日期：{PARAMS['dt_T']}"),
             legend_opts=opts.LegendOpts(is_show=False),
         )
         pie.set_series_opts(tooltip_opts=opts.TooltipOpts(formatter=JsCode("""
         function(params) {
-            var [func_name, cost] = params.name.split('|');
+            var [func_name, orders] = params.name.split('|');
             return 
-                '订单数：' + params.value
-                +'  金额：' + cost;
+                '订单数：' + orders
+                +'  金额：' + params.value;
         }
         """)))
         pie.set_series_opts(label_opts=opts.LabelOpts(formatter=JsCode("""
         function(params) {
-            var [func_name, cost] = params.name.split('|');
+            var [func_name, orders] = params.name.split('|');
             return func_name + 
                 '占比：' + params.percent.toFixed(1) + '%' + 
-                '; 金额：' + cost;
+                '; 金额：' + params.value;
         }
         """)))
+        pie.render('task1_pie.html')
         # add to page
         page.add(pie)
+
 
         table_data = addtion[[
             'func_name'
@@ -283,7 +289,9 @@ class visual_5_1_1(VisualGraph):
         # add to page
         page.add(table)
 
-        # table 2
+
+        # task 2
+
         _df = pd.read_excel(PARAMS['dws_mall_task2'])
         _df = _df.fillna(0)
         _df['func_name'] = _df['func_name'].astype(str)
@@ -302,7 +310,7 @@ class visual_5_1_1(VisualGraph):
             'dt'
             ,'func_name'
             ,'sub_func_name'
-            ,'orders'
+            ,'cost'
         ]]
 
         addition = _df[[
@@ -316,28 +324,30 @@ class visual_5_1_1(VisualGraph):
             ,'cost_diff_ratio'
         ]]
 
-        df_20240226 = data[data['dt'] == PARAMS['dt_T']].sort_values(by='orders', ascending=False)
+        df_20240226 = data[data['dt'] == PARAMS['dt_T']].sort_values(by='cost', ascending=False)
         # df_20240225 = data[data['dt'] == 20240225]
 
-        df_20240226_sorted = df_20240226.sort_values(by='orders', ascending=False)
+        df_20240226_sorted = df_20240226.sort_values(by='cost', ascending=False)
         sub_func_names_sorted = df_20240226_sorted['sub_func_name'].tolist()
         # df_20240225_sorted = df_20240225.set_index('sub_func_name').loc[sub_func_names_sorted].reset_index()
 
         bar = Bar()
         bar.add_xaxis(sub_func_names_sorted)
-        bar.add_yaxis(f"{PARAMS['dt_T']}", df_20240226_sorted['orders'].tolist())
+        bar.add_yaxis(f"{PARAMS['dt_T']}", df_20240226_sorted['cost'].tolist())
         # bar.add_yaxis("20240225 昨日订单数", df_20240225_sorted['orders'].tolist())
 
         bar.set_global_opts(
-            title_opts=opts.TitleOpts(title=f"仙魔大陆各礼包模块兑换订单数 - 日期：{PARAMS['dt_T']}"),
+            title_opts=opts.TitleOpts(title=f"仙魔大陆各礼包模块兑换金额 - 日期：{PARAMS['dt_T']}"),
             xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=45)),
-            yaxis_opts=opts.AxisOpts(name="兑换订单数"),
+            yaxis_opts=opts.AxisOpts(name="兑换金额"),
             legend_opts=opts.LegendOpts(pos_left='80%', pos_top='0%')
             # datazoom_opts=[opts.DataZoomOpts()],
         )
 
+        bar.render("bar_chart_comparison.html")
         # add to page
         page.add(bar)
+
 
         table_data = addition[addition['dt'] == PARAMS['dt_T']][[
             'sub_func_name'
@@ -366,7 +376,9 @@ class visual_5_1_1(VisualGraph):
         # add to page
         page.add(table)
 
-        # table 3
+
+        # task 3
+
         _df = pd.read_excel(PARAMS['dws_mall_task3'])
         _df = _df.fillna(0)
         _df['sub_func_name'] = _df['sub_func_name'].astype(str)
@@ -392,7 +404,7 @@ class visual_5_1_1(VisualGraph):
             'dt'
             ,'sub_func_name'
             ,'goods'
-            ,'orders'
+            ,'cost'
         ]]
 
         addition = _df[[
@@ -407,21 +419,22 @@ class visual_5_1_1(VisualGraph):
             ,'cost_diff_ratio'
         ]]
 
-        df_20240226 = data[data['dt'] == PARAMS['dt_T']]
+        df_20240226 = data[data['dt'] == PARAMS['dt_T']].sort_values(by='cost', ascending=False)
 
         bar = Bar()
         bar.add_xaxis(df_20240226['goods'].tolist())
-        bar.add_yaxis(f"全部礼包", df_20240226['orders'].tolist())
+        bar.add_yaxis(f"全部礼包", df_20240226['cost'].tolist())
         # bar.add_yaxis("20240225 昨日订单数", df_20240225_sorted['orders'].tolist())
 
         bar.set_global_opts(
-            title_opts=opts.TitleOpts(title=f"仙魔大陆所有模块TOP10礼包 兑换订单数 - 日期：{PARAMS['dt_T']}"),
+            title_opts=opts.TitleOpts(title=f"仙魔大陆所有模块TOP10礼包 兑换金额 - 日期：{PARAMS['dt_T']}"),
             xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=15)),
-            yaxis_opts=opts.AxisOpts(name="兑换订单数"),
+            yaxis_opts=opts.AxisOpts(name="兑换金额"),
             legend_opts=opts.LegendOpts(pos_left='80%', pos_top='0%')
             # datazoom_opts=[opts.DataZoomOpts()],
         )
 
+        bar.render("task3_bar.html")
         # add to page
         page.add(bar)
 
@@ -454,7 +467,8 @@ class visual_5_1_1(VisualGraph):
         page.add(table)
 
 
-        # table 4
+        # task 4
+
         _df = pd.read_excel(PARAMS['dws_mall_task4'])
         _df = _df.fillna(0)
         _df['func_name'] = _df['func_name'].astype(str)
@@ -492,7 +506,7 @@ class visual_5_1_1(VisualGraph):
             data = df_20240226[df_20240226['func_name'] == func_name][[
                 'func_name'
                 ,'goods'
-                ,'orders'
+                ,'cost'
             ]]
             addition = df_20240226[df_20240226['func_name'] == func_name][[
                 'func_name'
@@ -504,18 +518,20 @@ class visual_5_1_1(VisualGraph):
                 ,'cost_diff'
                 ,'cost_diff_ratio'
             ]]
+            data = data.sort_values(by = 'cost', ascending=False)
             bar = Bar()
             bar.add_xaxis(data['goods'].tolist())
-            bar.add_yaxis(f"{func_name}", data['orders'].tolist())
+            bar.add_yaxis(f"{func_name}", data['cost'].tolist())
 
             bar.set_global_opts(
-                title_opts=opts.TitleOpts(title=f"[{func_name}]: 礼包TOP10礼包兑换订单数 - 日期：{PARAMS['dt_T']}"),
+                title_opts=opts.TitleOpts(title=f"[{func_name}]: 礼包TOP10礼包兑换金额 - 日期：{PARAMS['dt_T']}"),
                 xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=15)),
-                yaxis_opts=opts.AxisOpts(name="兑换订单数"),
+                yaxis_opts=opts.AxisOpts(name="兑换金额"),
                 legend_opts=opts.LegendOpts(pos_left='80%', pos_top='0%')
                 # datazoom_opts=[opts.DataZoomOpts()],
             )
 
+            bar.render(f"task4_bar_{func_name}.html")
             # add to page
             page.add(bar)
 
@@ -545,6 +561,7 @@ class visual_5_1_1(VisualGraph):
             table.set_global_opts(
                 title_opts=ComponentTitleOpts(title=f"[{func_name}]: 与前日对比数据补充")
             )
+
             # add to page
             page.add(table)
 
@@ -552,12 +569,13 @@ class visual_5_1_1(VisualGraph):
 
 
 class Visualizer:
-    def __init__(self, config, root_path) -> None:
+    def __init__(self, config, root_path, module) -> None:
         self.config = config
+        self.module = module
         self.root_path = root_path
-        self.vis_dict = config['visual']
+        self.vis_dict = config[module.visual_module]
         self.end_dt = config['end_dt']
-        self.temp_save_path = config['connector']['temp_save_path']
+        self.temp_save_path = config[module.connector_module]['temp_save_path']
         assert self.end_dt is not None, 'end_dt is not existed'
     
     def run(self):
@@ -596,21 +614,3 @@ class Visualizer:
     def _save_graph(self, page):
         file = os.path.join(self.root_path, self.temp_save_path)+'/'+self.save_file_name
         # page.render(file)
-
-    def gen(self, df):
-        try:
-            if self.config['read_from_file']:
-                print("read from file")
-                df = self._read_date()
-            graphs = self.graph.gen(df)
-            print('graphs: {}'.format(graphs))
-            if self.save_to_file:
-                self._save_graph(graphs)
-        except Exception as e:
-            print('Process failed.')
-            if not self.read_from_file:
-                print('Visual: 读取flag为false，但是读取数据失败，可能是数据文件不存在。')
-            print(e)
-        return graphs
-    # graph are dynamic
-

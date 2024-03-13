@@ -5,6 +5,8 @@ PARENT_DIR = os.path.dirname(CURRENT_FILE_DIR)
 sys.path.insert(0, CURRENT_FILE_DIR)
 sys.path.insert(1, PARENT_DIR)
 
+CONFIG_FILE = 'config_fairydemon.yaml'
+
 from modules_fairyland.arguments import parser
 from modules_fairyland.config import ConfigManager
 from modules_fairyland.schedular_fairydemon import TaskScheduler
@@ -13,10 +15,19 @@ from modules_fairyland.report_fairydemon import ReportGenerator
 from modules_fairyland.visualizer_fairydemon import Visualizer
 from modules_fairyland.email import Email
 
-CONFIG_FILE = 'config_fairydemon.yaml'
 
 from datetime import datetime
 now = datetime.now()
+
+class Module:
+    def __init__(self, config) -> None:
+        assert config is not None, "Config is None"
+        assert config['module'] is not None, "module is None"
+        self.connector_module = config['module']['connector_module']
+        self.query_module = config['module']['query_module']
+        self.report_module = config['module']['report_module']
+        self.visual_module = config['module']['visual_module']
+        self.email_module = config['module']['email_module']
 
 def main():
     print("entered main fairydemon land")
@@ -39,17 +50,23 @@ def main():
     config['end_dt'] = param_dt['end_dt']
     config['start_dt'] = param_dt['start_dt']
 
-    scheduler = TaskScheduler(config = config, root_path = CURRENT_FILE_DIR, param_dt = param_dt)
-    scheduler.run_querys()
+    module = Module(config)
 
-    reporter = ReportGenerator(config = config, root_path = CURRENT_FILE_DIR)
-    reporter.run()
+    if config['steps']['query']:
+        scheduler = TaskScheduler(config = config, root_path = CURRENT_FILE_DIR, param_dt = param_dt, module = module)
+        scheduler.run_querys()
 
-    visulizer = Visualizer(config = config, root_path = CURRENT_FILE_DIR)
-    visulizer.run()
+    if config['steps']['report']:
+        reporter = ReportGenerator(config = config, root_path = CURRENT_FILE_DIR, module = module)
+        reporter.run()
+    
+    if config['steps']['visual']:
+        visulizer = Visualizer(config = config, root_path = CURRENT_FILE_DIR, module = module)
+        visulizer.run()
 
-    emailer = Email(config = config, root_path = CURRENT_FILE_DIR)
-    emailer.send_email()
+    if config['steps']['email']:
+        emailer = Email(config = config, root_path = CURRENT_FILE_DIR, module = module)
+        emailer.send_email()
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 With A as (
-SELECT
+(SELECT
     stats_dt,
     uid,
     max(level) as day_end_level_allhistory
@@ -24,8 +24,26 @@ from
 group by
     stats_dt,
     uid
-order by
-    stats_dt
+)
+union
+(select
+  distinct
+    t2.stats_dt
+    ,t1.uid
+    ,1 as day_end_level_allhistory
+from guozizhun.dwd_2d_fairy_demon_land_daily_lv1_users_validation_2 t1
+inner join (
+    select
+        dt as stats_dt
+    from
+        guozizhun.dates_dimension
+    where
+        dt between '{start_dt}' and '{end_dt}'
+) t2 on t1.dt <= t2.stats_dt
+left join b1_statistics.ods_log_fairy_demon_land_level_up_test t3
+on t1.uid = t3.uid and t3.dt <= t2.stats_dt
+where t3.uid is null
+)
 )
 ,
 B as (
