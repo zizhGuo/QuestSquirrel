@@ -17,27 +17,50 @@ import base64
 # python type placeholder
 from typing import List
 
+class EmailScheduler:
+    def __init__(self, config, root_path, module) -> None:
+        self.emails = []
+        for sub_email, _sub_config in config[module.email_module].items():
+            _ = Email(config, root_path, module, sub_email)
+            self.emails.append(_)
+
+    def send_email(self):
+        for i in range(len(self.emails)):
+            print('run send email')
+            try:
+                print(f'sending email: {i}')
+                self.emails[i].send_email()
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+            except Exception as e:
+                print(f'send email failed. {i}')
+                print(e)
+
 class Email:
     # def __init__(self, message, subject, header_from, header_to, sender_email, recipient_show, cc_show, user, password, to_addrs, email_company, attch_root_dir, output_file_name):
-    def __init__(self, config: dict, root_path, module):
+    def __init__(self, config: dict, root_path, module, sub_email):
         # self.email_config = config
         self.module = module
-        self.message = config[module.email_module]['message']
-        self.subject = config[module.email_module]['subject']
-        self.header_from = config[module.email_module]['header_from']
-        self.sender_email = config[module.email_module]['sender_email']
-        self.header_to = config[module.email_module]['header_to']
-        self.recipient_show = config[module.email_module]['recipient_show']
-        self.cc_show = config[module.email_module]['cc_show']
-        self.user = config[module.email_module]['user']
-        self.password = config[module.email_module]['password']
-        self.to_addrs = config[module.email_module]['to_addrs']
-        self.email_company = config[module.email_module]['email_company']
+        self.message = config[module.email_module][sub_email]['message']
+        self.subject = config[module.email_module][sub_email]['subject']
+        self.header_from = config[module.email_module][sub_email]['header_from']
+        self.sender_email = config[module.email_module][sub_email]['sender_email']
+        self.header_to = config[module.email_module][sub_email]['header_to']
+        self.recipient_show = config[module.email_module][sub_email]['recipient_show']
+        self.cc_show = config[module.email_module][sub_email]['cc_show']
+        self.user = config[module.email_module][sub_email]['user']
+        self.password = config[module.email_module][sub_email]['password']
+        self.to_addrs = config[module.email_module][sub_email]['to_addrs']
+        self.email_company = config[module.email_module][sub_email]['email_company']
         
         # init report result directory
-        self.temp_save_path = config[module.connector_module]['temp_save_path']
-        self.read_file = config[module.email_module]['read_file']
-        self.read_file_format = config[module.email_module]['read_file_format']
+        self.temp_save_path = config[module.email_module][sub_email]['temp_save_path']
+        self.read_file = config[module.email_module][sub_email]['read_file']
+        self.read_file_format = config[module.email_module][sub_email]['read_file_format']
 
         self.root_path = root_path
         self.end_dt = config['end_dt']
@@ -45,9 +68,9 @@ class Email:
         # init email sending report name
 
         # dt = '20231213'
-        self.send_file = config[module.email_module]['send_file']
+        self.send_file = config[module.email_module][sub_email]['send_file']
         # self.send_file_name = '{}_{}.xlsx'.format(self.send_file_name, dt)
-        self.send_file_format = config[module.email_module]['send_file_format']
+        self.send_file_format = config[module.email_module][sub_email]['send_file_format']
         # self.send_visual_name = '{}_{}.html'.format(self.send_visual_name, dt)
     
     def _get_attachment_path(self):

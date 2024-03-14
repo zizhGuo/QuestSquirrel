@@ -28,7 +28,7 @@ select
 from
     pre t2
 left join
-    b1_statistics.ods_log_shop t1
+    (select goods, costitemtype, dt, uid, count, costcount from b1_statistics.ods_log_shop where dt between '{start_dt}' and '{end_dt}') t1
 on
     t1.goods = t2.goodsid and t1.costitemtype = 1015 and t1.dt = t2.dt
 left join b1_statistics.ods_game_welfare_test t3

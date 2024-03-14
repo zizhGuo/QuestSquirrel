@@ -11,9 +11,9 @@ from modules_fairyland.arguments import parser
 from modules_fairyland.config import ConfigManager
 from modules_fairyland.schedular_fairydemon import TaskScheduler
 from modules_fairyland.date_converter import date2str, dt_minus_days
-from modules_fairyland.report_fairydemon import ReportGenerator
+from modules_fairyland.report_fairydemon import ReportSchedular
 from modules_fairyland.visualizer_fairydemon import Visualizer
-from modules_fairyland.email import Email
+from modules_fairyland.email import EmailScheduler
 
 
 from datetime import datetime
@@ -40,8 +40,15 @@ def main():
     # define sql params: date in dt format "yyyyMMdd"
     args = parser.parse_args()
     # end_dt = date2str(datetime.strptime(args.end_dt, "%Y-%m-%d"))
-    end_dt = dt_minus_days(args.end_dt, 1)
-    start_dt = dt_minus_days(args.end_dt, 2)
+    if config['end_dt'] is None:
+        end_dt = dt_minus_days(args.end_dt, 1)
+        start_dt = dt_minus_days(args.end_dt, 2)
+    else:
+        end_dt = dt_minus_days(config['end_dt'], 1)
+        if config['gap_days'] is None:
+            start_dt = dt_minus_days(config['start_dt'], 2)
+        else:
+            start_dt = dt_minus_days(config['end_dt'], config['gap_days'])
 
     param_dt = {
         'end_dt': end_dt
@@ -54,10 +61,10 @@ def main():
 
     if config['steps']['query']:
         scheduler = TaskScheduler(config = config, root_path = CURRENT_FILE_DIR, param_dt = param_dt, module = module)
-        scheduler.run_querys()
+        scheduler.run_tasks()
 
     if config['steps']['report']:
-        reporter = ReportGenerator(config = config, root_path = CURRENT_FILE_DIR, module = module)
+        reporter = ReportSchedular(config = config, root_path = CURRENT_FILE_DIR, module = module)
         reporter.run()
     
     if config['steps']['visual']:
@@ -65,7 +72,7 @@ def main():
         visulizer.run()
 
     if config['steps']['email']:
-        emailer = Email(config = config, root_path = CURRENT_FILE_DIR, module = module)
+        emailer = EmailScheduler(config = config, root_path = CURRENT_FILE_DIR, module = module)
         emailer.send_email()
 
 if __name__ == "__main__":

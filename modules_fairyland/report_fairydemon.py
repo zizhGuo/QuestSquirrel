@@ -90,23 +90,44 @@ def add_dataframe_to_worksheet(ws, df, start_row):
         # print(f"length: {length}")
         ws.column_dimensions[column_cells[0].column_letter].width = length
 
+class ReportSchedular:
+    def __init__(self, config, root_path, module) -> None:
+        self.report_generator = []
+        for sub_report, _sub_config in config[module.report_module].items():
+            _ = ReportGenerator(config, root_path, module, sub_report)
+            self.report_generator.append(_)
+    def run(self):
+        for i in range(len(self.report_generator)):
+            print('run report generator')
+            try:
+                print(f'generating report: {i}')
+                self.report_generator[i].run()
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+            except Exception as e:
+                print(f'gen report run failed. {i}')
+                print(e)
 
 class ReportGenerator:
-    def __init__(self, config, root_path, module):
+    def __init__(self, config, root_path, module, sub_report):
         self.module = module
-        self.tables = config[module.report_module]['source_tables']
+        self.tables = config[module.report_module][sub_report]['source_tables']
         # filter out the 'na' tables
         # self.tables = [table for table in self.tables if table != 'na']
         self.num_tables = len(self.tables)
-        self.output_dir =  config[module.report_module]['output_file']
-        self.worksheet =  config[module.report_module]['worksheet']
-        self.ws2title =  config[module.report_module]['ws2title']
-        self.column =  config[module.report_module]['column']
-        self.col2names =  config[module.report_module]['col2names']
-        self.style =  config[module.report_module]['style']
-        self.style_setting =  config[module.report_module]['style_setting']
+        self.output_dir =  config[module.report_module][sub_report]['output_file']
+        self.worksheet =  config[module.report_module][sub_report]['worksheet']
+        self.ws2title =  config[module.report_module][sub_report]['ws2title']
+        self.column =  config[module.report_module][sub_report]['column']
+        self.col2names =  config[module.report_module][sub_report]['col2names']
+        self.style =  config[module.report_module][sub_report]['style']
+        # self.style_setting =  config[module.report_module][sub_report]['style_setting']
         self.root_path = root_path
-        self.temp_save_path = config[module.connector_module]['temp_save_path']
+        self.temp_save_path = config[module.report_module][sub_report]['temp_save_path']
         self.end_dt = config['end_dt']
  
     def run(self):
