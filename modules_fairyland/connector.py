@@ -22,7 +22,7 @@ class HiveConnector:
         self.username = config[module.connector_module]['username']
         self.password = config[module.connector_module]['password']
         self.auth = config[module.connector_module]['auth']
-        self.temp_save_path = config[module.connector_module]['temp_save_path']
+        # self.temp_save_path = config[module.query_module][sub_task]['temp_save_path']
         try:
             self.conn = hive.Connection(host=self.host, 
                                    port= self.port,
@@ -38,7 +38,7 @@ class HiveConnector:
             print(e)
             return
 
-    def query_and_save(self, queries, template_names, i, tables):
+    def query_and_save(self, queries, template_names, i, tables, temp_save_path):
         print('enter query_and_save')
         query = queries[template_names[i]]
         table_name = tables[i]
@@ -63,7 +63,7 @@ class HiveConnector:
                 print(f'Time Spent: {time_end - time_start}s')
 
                 df = pd.DataFrame(results, columns=columns)
-                self.save_data(df, table_name)
+                self.save_data(df, table_name, temp_save_path)
             else:
                 print('No table to save to.')
                 
@@ -98,9 +98,9 @@ class HiveConnector:
             print(e)
         
     
-    def save_data(self, df, save_file_name):
+    def save_data(self, df, save_file_name, temp_save_path):
         try:
-            dir_path = os.path.join(self.root_path, self.temp_save_path, self.end_dt)
+            dir_path = os.path.join(self.root_path, temp_save_path, self.end_dt)
             file_path = os.path.join(dir_path, save_file_name)
             # file = os.path.join(self.root_path, self.temp_save_path)+'/'+ self.end_dt + '/'+save_file_name
             os.makedirs(dir_path, exist_ok=True)

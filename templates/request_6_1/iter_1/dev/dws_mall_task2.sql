@@ -8,7 +8,7 @@ select
 from
   guozizhun.dates_dimension t1
 join
-  guozizhun.config_xianmo t2
+  guozizhun.config_pacific_3d t2
 where
  t1.dt between '{start_dt}' and '{end_dt}'
 
@@ -28,10 +28,10 @@ select
 from
     pre t2
 left join
-    (select goods, costitemtype, dt, uid, count, costcount from b1_statistics.ods_log_shop where dt between '{start_dt}' and '{end_dt}') t1
+    (select goods, costitemtype, dt, uid, count, costcount from b3_statistics.ods_log_shop where dt between '{start_dt}' and '{end_dt}') t1
 on
-    t1.goods = t2.goodsid and t1.costitemtype = 1015 and t1.dt = t2.dt
-left join b1_statistics.ods_game_welfare_test t3
+    t1.goods = t2.goodsid and t1.costitemtype = 1012 and t1.dt = t2.dt
+left join b3_statistics.ods_game_welfare_test t3
     on t1.uid = t3.player_id
 )
 
@@ -69,6 +69,6 @@ select
 from
     B
 )
-select * from C where dt = '{end_dt}'
+select * from C 
 order by 
     dt desc, func_name, n_non_welfare_exchange_orders desc
