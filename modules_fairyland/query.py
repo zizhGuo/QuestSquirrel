@@ -6,8 +6,9 @@ class QueryManager:
             
             self.template_names = config[module.query_module][sub_task]['template_names']
             self.info = config[module.query_module][sub_task]['info']
+            self.params = config[module.query_module][sub_task]['params']
             # self.parameters = config['params']
-            self.parameters = param_dt
+            self.parameters = {**param_dt, **self.params}
             self.root_path = root_path
             
             print(self.template_names)

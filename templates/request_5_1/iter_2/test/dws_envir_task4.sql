@@ -209,6 +209,6 @@ select
 from F
 left join guozizhun.config_fishery t
 on F.gameid = t.id and t.type = 1
--- where dt = '{end_dt}'
+where dt = '{end_dt}'
 order by
     dt desc, t.id

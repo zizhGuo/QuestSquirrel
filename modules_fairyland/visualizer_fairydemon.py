@@ -434,7 +434,7 @@ class visual_5_1_1(VisualGraph):
             # datazoom_opts=[opts.DataZoomOpts()],
         )
 
-        bar.render("task3_bar.html")
+        # bar.render("task3_bar.html")
         # add to page
         page.add(bar)
 
@@ -482,6 +482,8 @@ class visual_5_1_1(VisualGraph):
             ,'costcount': 'costcount'
             ,'func_name': 'func_name'
             ,'n_non_welfare_exchange_orders': 'orders'
+            # ,'n_non_welfare_exchange_orders_original': 'orders_original'
+            # ,'n_non_welfare_exchange_orders_discount': 'orders_discount'
             ,'non_welfare_exchange_cost': 'cost'
             ,'non_welfare_exchange_orders_ratio': 'orders_ratio'
             ,'non_welfare_exchange_cost_ratio': 'cost_ratio'
@@ -519,6 +521,7 @@ class visual_5_1_1(VisualGraph):
                 ,'cost_diff_ratio'
             ]]
             data = data.sort_values(by = 'cost', ascending=False)
+
             bar = Bar()
             bar.add_xaxis(data['goods'].tolist())
             bar.add_yaxis(f"{func_name}", data['cost'].tolist())
@@ -531,7 +534,7 @@ class visual_5_1_1(VisualGraph):
                 # datazoom_opts=[opts.DataZoomOpts()],
             )
 
-            bar.render(f"task4_bar_{func_name}.html")
+            # bar.render(f"task4_bar_{func_name}.html")
             # add to page
             page.add(bar)
 
@@ -545,6 +548,7 @@ class visual_5_1_1(VisualGraph):
                 ,'cost_diff'
                 ,'cost_diff_ratio'
             ]]
+
             table_data['orders_diff'] = table_data['orders_diff'].round(0).astype(int)
             table_data['cost_diff'] = table_data['cost_diff'].round(0).astype(int)
             table_data['sort_helper'] = table_data['cost_diff'] == 0
@@ -552,6 +556,8 @@ class visual_5_1_1(VisualGraph):
             table_data.drop('sort_helper', axis=1, inplace=True)
 
             headers = table_data.columns.tolist()
+            print(table_data)
+
             headers= ['模块名称', '礼包名称ID', '兑换订单数', '与前日对比', '与前日对比占比', '金额', '与前日对比 ', '与前日对比占比 ']
             rows = table_data.values.tolist()
 

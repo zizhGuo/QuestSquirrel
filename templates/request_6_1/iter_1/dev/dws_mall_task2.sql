@@ -70,5 +70,6 @@ from
     B
 )
 select * from C 
+where dt = '{end_dt}'
 order by 
     dt desc, func_name, n_non_welfare_exchange_orders desc

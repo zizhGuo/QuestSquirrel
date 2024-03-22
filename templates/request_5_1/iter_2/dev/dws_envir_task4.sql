@@ -171,6 +171,7 @@ where
     ,C4.sum_item_gold / sum(C4.sum_item_gold) over(partition by D.dt) as item_gold_ratio
 
     ,C1.sum_gain_gold +  C4.sum_item_gold - E.sum_consumed_gold as sum_net_gold
+    ,lag(C1.sum_gain_gold +  C4.sum_item_gold - E.sum_consumed_gold) over(partition by D.gameid order by D.dt) as last_sum_net_gold
     from D
     inner join E
     on D.dt = E.dt and D.gameid = E.gameid
@@ -183,6 +184,12 @@ where
 ,F as (
   select
     *, consumed_gold_ratio - lag(consumed_gold_ratio) over(partition by gameid order by dt) as consumed_gold_ratio_diff
+  ,case 
+        when sum_net_gold < 0 and last_sum_net_gold > 0 then -sum_net_gold+last_sum_net_gold
+        when sum_net_gold > 0 and last_sum_net_gold < 0 then -sum_net_gold+last_sum_net_gold
+        when sum_net_gold < 0 and last_sum_net_gold < 0 then last_sum_net_gold-sum_net_gold
+        when sum_net_gold > 0 and last_sum_net_gold > 0 then last_sum_net_gold-sum_net_gold
+        else 0 end as sum_net_gold_diff
   from F1
 )
 
@@ -198,6 +205,7 @@ select
     ,CONCAT(FORMAT_NUMBER(CAST(consumed_gold_ratio_diff AS DECIMAL(17, 15))*100, 2), '%') as consumed_gold_ratio_diff
 
     ,FORMAT_NUMBER(sum_net_gold, 0) as sum_net_gold
+    ,FORMAT_NUMBER(sum_net_gold_diff, 0) as sum_net_gold_diff
 from F
 left join guozizhun.config_fishery t
 on F.gameid = t.id and t.type = 1

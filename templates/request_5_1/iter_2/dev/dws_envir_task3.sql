@@ -153,6 +153,8 @@ select
     ,C1.sum_gain_gold
     
     ,C1.sum_gain_gold +  C2.sum_gold_item2gold + C3.sum_gold_bonus2gold - E.sum_consumed_gold as sum_net_gold
+
+    ,lag(C1.sum_gain_gold +  C2.sum_gold_item2gold + C3.sum_gold_bonus2gold - E.sum_consumed_gold) over(order by D.dt) as last_sum_net_gold
 from D
 inner join E
 on D.dt = E.dt
@@ -162,6 +164,17 @@ inner join C2
 on D.dt = C2.dt
 inner join C3
 on D.dt = C3.dt
+)
+,F1 as (
+select 
+    *,case 
+        when sum_net_gold < 0 and last_sum_net_gold > 0 then -sum_net_gold+last_sum_net_gold
+        when sum_net_gold > 0 and last_sum_net_gold < 0 then -sum_net_gold+last_sum_net_gold
+        when sum_net_gold < 0 and last_sum_net_gold < 0 then last_sum_net_gold-sum_net_gold
+        when sum_net_gold > 0 and last_sum_net_gold > 0 then last_sum_net_gold-sum_net_gold
+        else 0 end as sum_net_gold_diff
+from
+    F
 )
 
 select
@@ -174,7 +187,8 @@ select
     ,format_number(COALESCE(sum_consumed_gold_diff, 0), 0) as sum_consumed_gold_diff
 
     ,FORMAT_NUMBER(sum_net_gold, 0) as sum_net_gold
+    ,FORMAT_NUMBER(sum_net_gold_diff, 0) as sum_net_gold_diff
 from
-    F
+    F1
 where dt = '{end_dt}'
 order by dt desc

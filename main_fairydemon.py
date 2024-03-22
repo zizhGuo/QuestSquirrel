@@ -2,11 +2,10 @@ import os
 import sys
 CURRENT_FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(CURRENT_FILE_DIR)
+pp_dir = os.path.dirname(PARENT_DIR)
 sys.path.insert(0, CURRENT_FILE_DIR)
 sys.path.insert(1, PARENT_DIR)
-
-CONFIG_FILE = 'config_fairydemon.yaml'
-
+print(f'parent dir: {pp_dir}')
 from modules_fairyland.arguments import parser
 from modules_fairyland.config import ConfigManager
 from modules_fairyland.schedular_fairydemon import TaskScheduler
@@ -32,23 +31,30 @@ class Module:
 def main():
     print("entered main fairydemon land")
 
+    # define sql params: date in dt format "yyyyMMdd"
+    args = parser.parse_args()
+
+    if args.config_file:
+        CONFIG_FILE = args.config_file
+        print(f'Using config file: {CONFIG_FILE}')
+    else:
+        print('Can\'t find config file. ')
+        return
+    
     # load config file
     config_path = os.path.join(CURRENT_FILE_DIR, CONFIG_FILE)
     config_manager = ConfigManager(config_path)
     config = config_manager.config
 
-    # define sql params: date in dt format "yyyyMMdd"
-    args = parser.parse_args()
+
     # end_dt = date2str(datetime.strptime(args.end_dt, "%Y-%m-%d"))
-    if config['end_dt'] is None:
+    
+    if config['test']['launch']:
+        end_dt = dt_minus_days(config['test']['params']['end_dt'], 1)
+        start_dt = dt_minus_days(config['test']['params']['end_dt'], config['test']['params']['gap_days'])
+    else:
         end_dt = dt_minus_days(args.end_dt, 1)
         start_dt = dt_minus_days(args.end_dt, 2)
-    else:
-        end_dt = dt_minus_days(config['end_dt'], 1)
-        if config['gap_days'] is None:
-            start_dt = dt_minus_days(config['start_dt'], 2)
-        else:
-            start_dt = dt_minus_days(config['end_dt'], config['gap_days'])
 
     param_dt = {
         'end_dt': end_dt
@@ -58,7 +64,7 @@ def main():
     config['start_dt'] = param_dt['start_dt']
 
     module = Module(config)
-
+    
     if config['steps']['query']:
         scheduler = TaskScheduler(config = config, root_path = CURRENT_FILE_DIR, param_dt = param_dt, module = module)
         scheduler.run_tasks()
