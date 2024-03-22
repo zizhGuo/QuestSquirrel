@@ -64,5 +64,6 @@ select
     *
 from C
 where 
+dt = '{end_dt}' and
 rn <= 10
 order by dt desc, func_name, rn

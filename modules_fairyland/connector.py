@@ -53,6 +53,9 @@ class HiveConnector:
             cursor.execute(query)
 
             if tables[i] != 'na':
+                format = 'xlsx'
+                if tables[i].split('.')[1] == 'csv':
+                    format = 'csv'
                 results = cursor.fetchall()
                 columns=[desc[0] for desc in cursor.description]
                 df = pd.DataFrame(results, columns=columns)
@@ -63,7 +66,7 @@ class HiveConnector:
                 print(f'Time Spent: {time_end - time_start}s')
 
                 df = pd.DataFrame(results, columns=columns)
-                self.save_data(df, table_name, temp_save_path)
+                self.save_data(df, table_name, temp_save_path, format)
             else:
                 print('No table to save to.')
                 
@@ -98,14 +101,16 @@ class HiveConnector:
             print(e)
         
     
-    def save_data(self, df, save_file_name, temp_save_path):
+    def save_data(self, df, save_file_name, temp_save_path, format='xlsx'):
         try:
             dir_path = os.path.join(self.root_path, temp_save_path, self.end_dt)
             file_path = os.path.join(dir_path, save_file_name)
             # file = os.path.join(self.root_path, self.temp_save_path)+'/'+ self.end_dt + '/'+save_file_name
             os.makedirs(dir_path, exist_ok=True)
-            
-            df.to_excel(file_path, index=False, engine='openpyxl')
+            if format == 'csv':
+                df.to_csv(file_path, index=False)
+            else:
+                df.to_excel(file_path, index=False, engine='openpyxl')
             # df.to_csv(file, index=False)
             print('Save data successfully.')
         except Exception as e:

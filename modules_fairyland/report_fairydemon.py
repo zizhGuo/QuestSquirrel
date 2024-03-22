@@ -4,51 +4,11 @@ from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font, Border, Side, Alignment
 
-'''
-query:
-  tasks_num: 8
-  template_names: ['dws_mall_task1', 'dws_mall_task2' ,'dws_mall_task3' ,'dws_mall_task4', 'dws_envir_task1', 'dws_envir_task2', 'dws_envir_task3', 'dws_envir_task4']
-  table_format: ['xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx']
-  tables: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx', 'dws_envir_task1.xlsx', 'dws_envir_task2.xlsx', 'dws_envir_task3.xlsx', 'dws_envir_task4.xlsx']
-  info:
-    req_cat: "request_5_1"
-    req_iter: "iter_1"
-    req_status: "deliver"
-  params:
-    NA: "NA"
+import sys
+print(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'transform')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'transform')))
 
-excel:
-  output_file: 'output.xlsx'
-  worksheet: ['ws1', 'ws2', 'ws3', 'ws4', 'ws5', 'ws6', 'ws7', 'ws7']
-  ws2title:
-    ws1: '仙魔大陆各模块数据大盘'
-    ws2: '仙魔大陆各礼包模块'
-    ws3: '仙魔各礼包ID TOP10礼包'
-    ws4: '仙魔各模块中礼包ID TOP10礼包'
-    ws5: '每日活跃人数中各境界分布情况'
-    ws6: '境界突破情况分布'
-    ws7: '仙魔大陆渔场消耗'
-  column: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6', 'col7', 'col8']
-  col2names:
-    col1: ['日期',	'模块名称',	'点券兑换订单数',	'点券兑换金额',	'仙魔大陆整体订单占比',	'仙魔大陆整体金额占比',	'与前一日兑换订单数对比',	'与前一日点券兑换金额对比',	'与前一日订单数环比',	'与前一日兑换金额环比']
-    col2: ['日期',	'模块名称',	礼包类型',	'兑换订单数',	'兑换金额',	'模块订单占比',	'模块兑换金额占比',	'与前一日兑换订单数对比',	'与前一日点券兑换金额对比',	'与前一日订单数环比',	'与前一日兑换金额环比']
-    col3: ['日期'	,'序号'	,'礼包名称'	,'礼包类型'	,'礼包单价'	,'兑换订单数'	,'兑换金额'	,'仙魔大陆总兑换订单占比'	,'仙魔大陆总兑换金额占比'	,'与前一日兑换订单数对比'	,'与前一日点券兑换金额对比'	,'与前一日订单数环比'	,'与前一日兑换金额环比']
-    col4: ['日期'	,'模块名称'	,'序号'	,'礼包名称'	,'礼包单价'	,'兑换订单数'	,'兑换金额'	,'仙魔大陆总兑换订单占比'	,'仙魔大陆总兑换金额占比'	,'与前一日兑换订单数对比'	,'与前一日点券兑换金额对比'	,'与前一日订单数环比'	,'与前一日兑换金额环比']
-    col5: ['日期',	'境界等级',	'境界人数',	'各境界人数与前一日对比']
-    col6: ['日期',	'境界等级',	'经历过对应境界等级总人数',	'类型', '操作总次数', '操作总人数']
-    col7: [,'日期'	,'总游戏人数'	,'人均游戏时长（分钟）'	,'与前一日对比'	,'总消耗金币'	,'与前一日对比'	,'净分']
-    col8: ['日期'	,'渔场名称'	,'渔场游戏人数'	,'人均游戏时长（分钟）'	,'与前一日对比'	,'总消耗金币'	,'消耗金币占比'	,'与前一日对比'	,'净分']
-  style: ['general', 'general', 'general', 'general', 'general', 'general', 'general', 'general']
-  style_setting:
-    general:
-      header: 
-        font: 'Bold'
-        border: 'Medium'
-        align: 'Center'
-      cell:
-        font: 'Regular'
-        border: 'Thin'
-        align: 'Center'
+'''
 '''
 THICK_BORDER = Border(
     left=Side(style='thin'), 
@@ -115,6 +75,10 @@ class ReportSchedular:
 class ReportGenerator:
     def __init__(self, config, root_path, module, sub_report):
         self.module = module
+        self.sub_report = sub_report
+        if config[module.report_module][sub_report].get('transform_module') is None:
+            self.transform_module = config[module.report_module][sub_report]['transform_module']
+            self.transform_class = config[module.report_module][sub_report]['transform_class']
         self.tables = config[module.report_module][sub_report]['source_tables']
         # filter out the 'na' tables
         # self.tables = [table for table in self.tables if table != 'na']
@@ -150,6 +114,12 @@ class ReportGenerator:
                 df = pd.read_excel(_dir)
                 # rename columns
                 df.columns = self.col2names[self.column[self.tables.index(file)]]
+                
+                # insert dataframe edit class
+                # df = new_class(df).edit()
+                if self.transform_module is not None and self.transform_class[self.tables.index(file)] != 'na':
+                    transformer = self._create_transform_instance(file)(df)
+                    df = transformer.edit()
                 start_row = add_dataframe_to_worksheet(ws, df, start_row)
 
             # adjust_column_width(ws)
@@ -191,4 +161,14 @@ class ReportGenerator:
             for sheet in sheet_list:
                 tables_new[sheet] = tables[sheet]
             write_xlsx(tables_new, self.root_path, self.output_dir, file)
+    
+    def _create_transform_instance(self, file):
+        module_path = os.path.join(os.path.dirname(__file__), '..', 'transform')
+        if module_path not in sys.path:
+            sys.path.append(module_path)
+        import importlib
+        module = importlib.import_module(self.transform_module)
+        Class = getattr(module, self.transform_class[self.tables.index(file)])
+        return Class
+
 
