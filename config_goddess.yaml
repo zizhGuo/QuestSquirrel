@@ -35,7 +35,6 @@ query_goddess_visual_test:
     temp_save_path: "data/quest_goddess"
     tasks_num: 3
     template_names: ['visual_part_1_1', 'visual_part_1_2', 'visual_part_2']
-    table_format: ['csv', 'csv', 'xlsx']
     tables: ['Quest_2_1_iter2_visual_filtered_order.csv', 'Quest_2_1_iter2_visual_purchase_type.csv', 'query-hive-1002.xlsx']
     info:
       req_cat: "request_2_1"

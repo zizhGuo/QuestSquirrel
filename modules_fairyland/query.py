@@ -69,6 +69,26 @@ class QueryManager_manual:
         sql_run = self._process_query(sql)
         return sql_run
 
+    def load_all_query_from_dir(self, directory):
+        # iterate all sql files in 'path' directory
+        import os
+        sql_file_contents = []
+        # sort os.listdir(directory)
+        # os.listdir(directory).sort()
+
+        for file in sorted(os.listdir(directory)):
+            # Construct the full path of the file
+            print(file)
+            if file == 'all.sql':
+                continue
+            full_path = os.path.join(directory, file)
+            # Check if it's a file and ends with .sql
+            if os.path.isfile(full_path) and file.endswith('.sql'):
+                with open(full_path, 'r', encoding='utf-8') as sql_file:
+                    content = sql_file.read()
+                    sql_file_contents.append(self._process_query(content))
+        return sql_file_contents
+
     def _process_query(self, query):
         import re
         query = query.replace('\n', ' ')  # Remove newline characters

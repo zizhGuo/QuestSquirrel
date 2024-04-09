@@ -1,7 +1,20 @@
+connector:
+  host: "172.19.121.24"
+  port: "10000"
+  hive_conf:
+    "hive.resultset.use.unique.column.names": "false"
+    "hive.execution.engine": "spark"
+    "spark.executor.instances": "6"
+    "spark.executor.cores": "8"
+    "spark.driver.cores": "8"
+  username: "hadoop"
+  password: "hadoop"
+  auth: "CUSTOM"
+
 test:
-  launch: 0
+  launch: 1
   params:
-    end_dt: '2024-03-19'
+    end_dt: '2024-03-27'
     gap_days: 8
 
 steps: 
@@ -12,10 +25,10 @@ steps:
 
 module:
   connector_module: 'connector'
-  query_module: 'query_pacific_envir34_test'
-  report_module: 'report_pacific_envir34_test'
+  query_module: 'query_pacific_envir1234_test'
+  report_module: 'report_pacific_envir1234_test'
   visual_module: 'visual_pacific_test'
-  email_module: 'email_pacific_envir34_test'
+  email_module: 'email_pacific_envir1234_test'
 
 query_pacific_envir2_test:
   task1:
@@ -29,8 +42,7 @@ query_pacific_envir2_test:
       req_iter: "iter_1"
       req_status: "dev_batch"
     params:
-      end_dt: '20240319'
-      start_dt: '20240311'
+      na: 'na'
 
 report_pacific_envir2_test:
   report1:
@@ -93,66 +105,55 @@ email_pacific_envir2_test:
     send_file: ['环太平洋日报1期-生态2-测试执行']
     send_file_format: ['xlsx']
 
-query_pacific_envir34_test:
+query_pacific_envir1234_test:
   task1:
     temp_save_path: "data/quest_pacific"
-    tasks_num: 2
-    template_names: ['dws_envir_task3', 'dws_envir_task4']
-    table_format: ['xlsx', 'xlsx']
-    tables: ['dws_envir_task3.xlsx', 'dws_envir_task4.xlsx']
+    tasks_num: 4
+    template_names: ['dws_envir_task1', 'dws_envir_task2', 'dws_envir_task3', 'dws_envir_task4']
+    flags: [1, 1, 1, 1]
+    table_format: ['xlsx', 'xlsx', 'xlsx', 'xlsx']
+    tables: ['dws_envir_task1.xlsx', 'dws_envir_task2.xlsx', 'dws_envir_task3.xlsx', 'dws_envir_task4.xlsx']
     info:
       req_cat: "request_6_1"
       req_iter: "iter_1"
       req_status: "dev_batch"
     params:
-      dt_end: '20240320'
-      start_dt: '20240312'
+      fishery_ids: '(132, 133, 134, 135, 136, 137, 138)'
 
-report_pacific_envir34_test:
+report_pacific_envir1234_test:
   report1:
-    desc: '环太平洋日报1期-生态34-测试处理dataframe模块1-批量处理'
+    desc: '环太平洋日报1期-生态1234-第一版批量校验'
     temp_save_path: "data/quest_pacific"
     output_file: 'result_pacific.xlsx'
-    source_tables: ['dws_envir_task3.xlsx', 'dws_envir_task4.xlsx']
-    worksheet: ['ws7', 'ws7']
+    source_tables: ['dws_envir_task1.xlsx', 'dws_envir_task2.xlsx', 'dws_envir_task3.xlsx', 'dws_envir_task4.xlsx']
+    worksheet: ['ws5', 'ws6', 'ws7', 'ws7']
     ws2title:
-      ws1: '仙魔大陆各模块数据大盘'
-      ws2: '仙魔大陆各礼包模块'
-      ws3: '仙魔各礼包ID TOP10礼包'
-      ws4: '仙魔各模块中礼包ID TOP10礼包'
-      ws5: '每日各境界人数分布情况'
-      ws6: '境界突破情况分布'
-      ws7: '仙魔大陆渔场消耗'
-    column: ['col7', 'col8']
+      ws1: '太平洋各模块数据大盘'
+      ws2: '太平洋各礼包模块'
+      ws3: '太平洋各礼包ID TOP10礼包'
+      ws4: '太平洋各模块中礼包ID TOP10礼包'
+      ws5: '太平洋每日各等级人数分布情况'
+      ws6: '太平洋突破情况分布'
+      ws7: '太平洋渔场消耗'
+    column: ['col5', 'col6', 'col7', 'col8']
     transform_module: "quest_6_1_iter_1"
-    transform_class: ['na', "T_quest_6_1_iter_1_envir_4"]
+    transform_class: ['na', 'na', 'na', 'T_quest_6_1_iter_1_envir_4']
     col2names:
-      col1: ['日期', '模块名称', '点券兑换订单数', '点券兑换金额', '仙魔大陆整体订单占比', '仙魔大陆整体金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+      col1: ['日期', '模块名称', '点券兑换订单数', '点券兑换金额', '太平洋体订单占比', '太平洋整体金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
       col2: ['日期', '模块名称', '礼包类型', '兑换订单数', '兑换金额', '模块订单占比', '模块兑换金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
       col3: ['日期' ,'序号' ,'礼包名称' ,'礼包类型' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
       col4: ['日期' ,'模块名称' ,'序号' ,'礼包名称' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
-      col5: ['日期', '境界等级', '境界人数', '各境界人数与前一日对比']
-      col6: ['日期', '境界等级', '经历过对应境界等级总人数', '类型', '操作总次数', '操作总人数']
+      col5: ['日期', '等级', '名称', '人数', '各境界人数与前一日对比']
+      col6: ['日期', '名称', '经历过对应等级总人数', '类型', '操作总次数', '操作总人数']
       col7: ['日期' ,'总游戏人数' ,'与前一日对比', '人均游戏时长（分钟）' ,'与前一日对比' ,'总消耗金币' ,'与前一日对比' ,'净分', '与前一日对比']
       col8: ['日期' , '渔场id', '渔场名称' ,'渔场游戏人数' ,'与前一日对比' , '人均游戏时长（分钟）' ,'与前一日对比' ,'总消耗金币' ,'消耗金币占比' ,'与前一日对比' ,'净分', '与前一日对比']
-    style: ['general', 'general']
-    style_setting:
-      general:
-        header: 
-          font: 'Bold'
-          border: 'Medium'
-          align: 'Center'
-        cell:
-          font: 'Regular'
-          border: 'Thin'
-          align: 'Center'
 
-email_pacific_envir34_test:
+email_pacific_envir1234_test:
   email1:
-    desc: '环太平洋1期-生态34-测试处理dataframe模块1'
+    desc: '环太平洋1期-生态1234-第一版批量校验'
     # message: "测试QuestSquirrel"
-    message: "【环太平洋1期测试-生态34-测试处理dataframe模块1-批量处理】附件包含报表，query，report，email，2个表，无visual，测试正常得到生态34表，【有】dataframe处理"
-    subject: "【环太平洋1期测试-生态34-测试处理dataframe模块1-批量处理】环太平洋生态34日报"
+    message: "【环太平洋1期测试-生态1234-批量校验】附件包含报表，query，report，email，2个表，无visual，测试正常得到生态34表，【有】dataframe处理"
+    subject: "【环太平洋1期测试-生态1234-批量校验】环太平洋生态34日报"
     header_from: "dr.who"
     sender_email: "guozizhun@cxxmobi.com"
     header_to: "guozizhun@cxxmobi.com"
@@ -168,47 +169,49 @@ email_pacific_envir34_test:
     read_file: ['result_pacific']
     read_file_format: ['xlsx']
     # report_save_path: "data/results"
-    send_file: ['环太平洋商城日报-生态34-测试处理dataframe模块1-批量处理']
+    send_file: ['环太平洋商城日报-生态1234-批量校验']
     send_file_format: ['xlsx']
-
-
 
 query_pacific_filter_test:
   task1:
     temp_save_path: "data/quest_pacific"
     tasks_num: 4
     template_names: ['dws_mall_task1', 'dws_mall_task2', 'dws_mall_task3', 'dws_mall_task4']
+    flags: [1, 1, 1, 1]
     table_format: ['xlsx', 'xlsx', 'xlsx', 'xlsx']
     tables: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
     info:
       req_cat: "request_6_1"
       req_iter: "iter_1"
-      req_status: "dev"
+      req_status: "welfare_filter"
     params:
       NA: "NA"
 
 report_pacific_filter_test:
   report1:
-    desc: '环太平洋日报1期-测试-校验过滤掉福利号8日数据'
+    desc: '环太平洋日报1期-校验包含福利号8日数据'
     temp_save_path: "data/quest_pacific"
     output_file: 'result_pacific.xlsx'
     source_tables: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
     worksheet: ['ws1', 'ws2', 'ws3', 'ws4']
     ws2title:
-      ws1: '仙魔大陆各模块数据大盘'
-      ws2: '仙魔大陆各礼包模块'
-      ws3: '仙魔各礼包ID TOP10礼包'
-      ws4: '仙魔各模块中礼包ID TOP10礼包'
-      ws5: '每日各境界人数分布情况-版本1原版后台标准'
-      ws6: '每日各境界人数分布情况-版本2仙魔标准'
-    column: ['col1', 'col2', 'col3', 'col4']
+      ws1: '太平洋各模块数据大盘'
+      ws2: '太平洋各礼包模块'
+      ws3: '太平洋各礼包ID TOP10礼包'
+      ws4: '太平洋各模块中礼包ID TOP10礼包'
+      ws5: '太平洋每日各等级人数分布情况'
+      ws6: '太平洋每日各境界人数分布情况-版本2仙魔标准'
+    column: ['col1', 'col2', 'col3', 'col4', 'col5']
+    transform_module: "quest_6_1_iter_1"
+    transform_class: ['na', "na", "na", "na"]
     col2names:
-      col1: ['日期', '模块名称', '点券兑换订单数', '点券兑换金额', '仙魔大陆整体订单占比', '仙魔大陆整体金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+      col1: ['日期', '模块名称', '点券兑换订单数', '点券兑换金额', '太平洋体订单占比', '太平洋整体金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
       col2: ['日期', '模块名称', '礼包类型', '兑换订单数', '兑换金额', '模块订单占比', '模块兑换金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
       col3: ['日期' ,'序号' ,'礼包名称' ,'礼包类型' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
       col4: ['日期' ,'模块名称' ,'序号' ,'礼包名称' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
-      col5: ['日期', '境界等级', '境界人数', '各境界人数与前一日对比']
-    style: ['general', 'general', 'general', 'general']
+      col5: ['日期', '等级', '名称', '人数', '各境界人数与前一日对比']
+      col6: ['日期', '名称', '经历过对应等级总人数', '类型', '操作总次数', '操作总人数']
+    style: ['general', 'general', 'general', 'general', 'general']
     style_setting:
       general:
         header: 
@@ -222,10 +225,10 @@ report_pacific_filter_test:
 
 email_pacific_filter_test:
   email1:
-    desc: '环太平洋1期-测试-商城表-校验过滤掉福利号8日数据'
+    desc: '环太平洋1期-测试-商城表'
     # message: "测试QuestSquirrel"
-    message: "【环太平洋1期测试-商城表-校验过滤掉福利号8日数据】附件包含报表"
-    subject: "【环太平洋1期测试-商城表-校验过滤掉福利号8日数据】环太平洋商城日报"
+    message: "【环太平洋1期测试-商城表-校验包含福利号8日数据】附件包含报表"
+    subject: "【环太平洋1期测试-商城表-校验包含福利号8日数据】环太平洋商城日报"
     header_from: "dr.who"
     sender_email: "guozizhun@cxxmobi.com"
     header_to: "guozizhun@cxxmobi.com"
@@ -238,11 +241,76 @@ email_pacific_filter_test:
     # to_addrs: "tulinchao@cxxmobi.com, huangjinjing@cxxmobi.com"
     email_company: "qq"
     temp_save_path: "data/quest_pacific"
-    read_file: ['result_pacific']
-    read_file_format: ['xlsx']
+    read_file: ['result_pacific', 'result_pacific_visual']
+    read_file_format: ['xlsx', 'html']
     # report_save_path: "data/results"
-    send_file: ['环太平洋商城日报-测试-校验过滤掉福利号8日数据']
-    send_file_format: ['xlsx']
+    send_file: ['环太平洋商城日报-校验包含福利号8日数据', '太平洋商城图示-第一版校验']
+    send_file_format: ['xlsx', 'html']
+
+query_pacific_all_test:
+  task1:
+    temp_save_path: "data/quest_pacific"
+    tasks_num: 8
+    template_names: ['dws_mall_task1', 'dws_mall_task2', 'dws_mall_task3', 'dws_mall_task4', 'dws_envir_task1','dws_envir_task2', 'dws_envir_task3', 'dws_envir_task4']
+    tables: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx', 'dws_envir_task1.xlsx', 'dws_envir_task2.xlsx', 'dws_envir_task3.xlsx', 'dws_envir_task4.xlsx']
+    info:
+      req_cat: "request_6_1"
+      req_iter: "iter_1"
+      req_status: "stable"
+    params:
+      NA: "NA"
+
+report_pacific_all_test:
+  report1:
+    desc: '环太平洋日报1期-测试'
+    temp_save_path: "data/quest_pacific"
+    output_file: 'result_pacific.xlsx'
+    source_tables: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx', 'dws_envir_task1.xlsx', 'dws_envir_task2.xlsx', 'dws_envir_task3.xlsx', 'dws_envir_task4.xlsx']
+    worksheet: ['ws1', 'ws2', 'ws3', 'ws4', 'ws5']
+    ws2title:
+      ws1: '太平洋各模块数据大盘'
+      ws2: '太平洋各礼包模块'
+      ws3: '太平洋各礼包ID TOP10礼包'
+      ws4: '太平洋各模块中礼包ID TOP10礼包'
+      ws5: '太平洋每日各等级人数分布情况'
+      ws6: '太平洋突破情况分布'
+      ws7: '太平洋渔场消耗'
+    column: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6', 'col7', 'col8']
+    transform_module: "quest_6_1_iter_1"
+    transform_class: ['na', "na", "na", "na", "na", 'na', 'na', 'report_6_1_envir_4']
+    col2names:
+      col1: ['日期', '模块名称', '点券兑换订单数', '点券兑换金额', '太平洋体订单占比', '太平洋整体金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+      col2: ['日期', '模块名称', '礼包类型', '兑换订单数', '兑换金额', '模块订单占比', '模块兑换金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+      col3: ['日期' ,'序号' ,'礼包名称' ,'礼包类型' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
+      col4: ['日期' ,'模块名称' ,'序号' ,'礼包名称' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
+      col5: ['日期', '等级', '名称', '人数', '各境界人数与前一日对比']
+      col6: ['日期', '名称', '经历过对应等级总人数', '类型', '操作总次数', '操作总人数']
+      col7: ['日期' ,'总游戏人数' ,'与前一日对比', '人均游戏时长（分钟）' ,'与前一日对比' ,'总消耗金币' ,'与前一日对比' ,'净分', '与前一日对比']
+      col8: ['日期' , '渔场id', '渔场名称' ,'渔场游戏人数' ,'与前一日对比' , '人均游戏时长（分钟）' ,'与前一日对比' ,'总消耗金币' ,'消耗金币占比' ,'与前一日对比' ,'净分', '与前一日对比']
+
+email_pacific_all_test:
+  email1:
+    desc: '环太平洋1期-测试'
+    # message: "测试QuestSquirrel"
+    message: "【环太平洋1期测试-测试】附件包含报表"
+    subject: "【环太平洋1期测试-测试】环太平洋商城日报"
+    header_from: "dr.guo"
+    sender_email: "guozizhun@cxxmobi.com"
+    header_to: "guozizhun@cxxmobi.com"
+    recipient_show: "[email_test]"
+    cc_show: "guozizhun@cxxmobi.com, 464096202@qq.com"
+    # cc_show: ""
+    user: "guozizhun@cxxmobi.com"
+    password: "SMBz75e5chpJzsr2"
+    to_addrs: "464096202@qq.com, guozizhun@cxxmobi.com"
+    # to_addrs: "tulinchao@cxxmobi.com, huangjinjing@cxxmobi.com"
+    email_company: "qq"
+    temp_save_path: "data/quest_pacific"
+    read_file: ['result_pacific', 'result_pacific_visual']
+    read_file_format: ['xlsx', 'html']
+    # report_save_path: "data/results"
+    send_file: ['环太平洋商城日报-测试', '太平洋商城图示-测试']
+    send_file_format: ['xlsx', 'html']
 
 query_pacific_test:
   task1:
@@ -349,11 +417,6 @@ visual_pacific_test:
     temp_save_path: "data/quest_pacific"
     template: 'visual_6_1_1'
     files: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
-  vis2:
-    output_file: 'quest_fairydemon_visual.html'
-    temp_save_path: "data/quest_fairydemon"
-    template: 'visual_5_1_1'
-    files: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
 
 email_pacific_test:
   email1:
@@ -400,7 +463,6 @@ email_pacific_test:
     # report_save_path: "data/results"
     send_file: ['仙魔大陆日报1期-测试-优化版试上线', '仙魔商城图示-测试']
     send_file_format: ['xlsx', 'html']
-
 
 query_fairy_test:
   task1:
@@ -462,13 +524,6 @@ email_fairy_test:
     send_file: ['仙魔大陆1期日报-生态34-增加净分与上日对比']
     send_file_format: ['xlsx']
 
-
-
-
-
-
-
-
 query_test:
   task1:
     temp_save_path: "data/quest_fairydemon"
@@ -494,7 +549,6 @@ query_test:
       req_status: "dev"
     params:
       NA: "NA"
-
 
 report_test:
   report1:
@@ -595,7 +649,6 @@ email_test1:
     send_file: ['仙魔大陆商城&生态日报', '仙魔大陆商城图示']
     send_file_format: ['xlsx', 'html']
 
-
 email_test2:
   email1:
     desc: 'Email1: EmailSchedular 全面测试'
@@ -640,19 +693,6 @@ email_test2:
     # report_save_path: "data/results"
     send_file: ['假太平洋其实是仙魔商城数据表']
     send_file_format: ['xlsx']
-
-connector:
-  host: "172.19.121.24"
-  port: "10000"
-  hive_conf:
-    "hive.resultset.use.unique.column.names": "false"
-    "hive.execution.engine": "spark"
-    "spark.executor.instances": "6"
-    "spark.executor.cores": "8"
-    "spark.driver.cores": "8"
-  username: "hadoop"
-  password: "hadoop"
-  auth: "CUSTOM"
 
 query:
   task1:

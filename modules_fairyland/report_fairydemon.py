@@ -76,7 +76,8 @@ class ReportGenerator:
     def __init__(self, config, root_path, module, sub_report):
         self.module = module
         self.sub_report = sub_report
-        if config[module.report_module][sub_report].get('transform_module') is None:
+        if config[module.report_module][sub_report].get('transform_module') is not None:
+            print('entered!!!!!!!!!!!!!!!transoform!!!!!')
             self.transform_module = config[module.report_module][sub_report]['transform_module']
             self.transform_class = config[module.report_module][sub_report]['transform_class']
         self.tables = config[module.report_module][sub_report]['source_tables']
@@ -88,8 +89,6 @@ class ReportGenerator:
         self.ws2title =  config[module.report_module][sub_report]['ws2title']
         self.column =  config[module.report_module][sub_report]['column']
         self.col2names =  config[module.report_module][sub_report]['col2names']
-        self.style =  config[module.report_module][sub_report]['style']
-        # self.style_setting =  config[module.report_module][sub_report]['style_setting']
         self.root_path = root_path
         self.temp_save_path = config[module.report_module][sub_report]['temp_save_path']
         self.end_dt = config['end_dt']
@@ -103,6 +102,7 @@ class ReportGenerator:
                 ws_data[ws] = []
             ws_data[ws].append(table)
         print(f"ws_data: {ws_data}")
+        # for ws, files in sorted(ws_data.items(), key = lambda x : int(x[0][2:])):
         for ws, files in ws_data.items():
             ws = wb.create_sheet(title=self.ws2title[ws])
             start_row = 1
@@ -117,11 +117,14 @@ class ReportGenerator:
                 
                 # insert dataframe edit class
                 # df = new_class(df).edit()
-                if self.transform_module is not None and self.transform_class[self.tables.index(file)] != 'na':
+
+                if hasattr(self, 'transform_module') and self.transform_class[self.tables.index(file)] != 'na':
+                    print('file is {}'.format(file))
                     transformer = self._create_transform_instance(file)(df)
                     df = transformer.edit()
+                    transformer.show()
                 start_row = add_dataframe_to_worksheet(ws, df, start_row)
-
+            # 根据df是否为单表还是多表，增加add_dataframe_to_worksheet的处理逻辑
             # adjust_column_width(ws)
 
             # print(f'ws.columns:{ws.columns}')

@@ -1,7 +1,12 @@
+import sys
 import os
+print('append module path: {}'.format(os.path.abspath(os.path.dirname(__file__))))
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
 from pyhive import hive
 import pandas as pd
 import time
+from decorators import retry
 
 class HiveConnector:
     def __init__(self, config, root_path, module):
@@ -23,50 +28,73 @@ class HiveConnector:
         self.password = config[module.connector_module]['password']
         self.auth = config[module.connector_module]['auth']
         # self.temp_save_path = config[module.query_module][sub_task]['temp_save_path']
-        try:
-            self.conn = hive.Connection(host=self.host, 
+        # try:
+        print('running function: {}'.format(self.create_connection.__name__))
+        self.conn = self.create_connection()
+        print('Connection successful. conn: {}'.format(self.conn))
+        #     print(self.conn)
+        #     # conn = hive.Connection(host=host, port=port, username=username, password=password, database=database)
+        # except Exception as e:
+        #     print('Connection failed.')
+        #     print(e)
+        #     return
+
+    @retry(max_retries=3, retry_delay=5, exception_to_check=Exception)
+    def create_connection(self):
+        return hive.Connection(host=self.host, 
                                    port= self.port,
                                    configuration=self.hive_conf, 
                                    auth=self.auth,
                                    username=self.username,
                                    password=self.password
                                    )
-            print(self.conn)
-            # conn = hive.Connection(host=host, port=port, username=username, password=password, database=database)
-        except Exception as e:
-            print('Connection failed.')
-            print(e)
-            return
 
-    def query_and_save(self, queries, template_names, i, tables, temp_save_path):
+    @retry(max_retries=3, retry_delay=10, exception_to_check=Exception)
+    def query_results(self, query):
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        columns=[desc[0] for desc in cursor.description]
+        print('results: {}'.format(results))
+        df = pd.DataFrame(results, columns=columns)
+        if df.empty:
+            print('Empty dataframe.')
+            raise Exception('No result set to fetch from. from dataframe')
+        return df
+
+    @retry(max_retries=3, retry_delay=10, exception_to_check=Exception)
+    def just_query(self, query):
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+
+    def query_and_save(self, queries, template_names, i, tables, flags, temp_save_path):
         print('enter query_and_save')
         query = queries[template_names[i]]
         table_name = tables[i]
         if query == 'na':
             return
         try:
-            # start time
-            time_start = time.time()
-
-            cursor = self.conn.cursor()
-            print(f'Query No: {i}')
-            cursor.execute(query)
-
-            if tables[i] != 'na':
+            if tables[i] != 'na' and flags[i]:
                 format = 'xlsx'
                 if tables[i].split('.')[1] == 'csv':
                     format = 'csv'
-                results = cursor.fetchall()
-                columns=[desc[0] for desc in cursor.description]
-                df = pd.DataFrame(results, columns=columns)
-                # print(columns)
-                # print current time
+                # start time
+                time_start = time.time()
+                df = self.query_results(query)
                 time_end = time.time()
                 print('results in df: {}'.format(df))
                 print(f'Time Spent: {time_end - time_start}s')
-
-                df = pd.DataFrame(results, columns=columns)
                 self.save_data(df, table_name, temp_save_path, format)
+            elif tables[i] != 'na' and flags[i] == 0:
+                print('Skip this query.')
+            elif tables[i] == 'na' and flags[i]:
+                time_start = time.time()
+                df = self.just_query(query)
+                time_end = time.time()
+                print('results in df: {}'.format(df))
+                print(f'Time Spent: {time_end - time_start}s')
+            elif tables[i] == 'na' and flags[i] == 0:
+                print('Skip this query.')
             else:
                 print('No table to save to.')
                 

@@ -2,6 +2,7 @@ import os
 from pyhive import hive
 import pandas as pd
 import time
+from decorator import retry
 
 class HiveConnector:
     def __init__(self, config, root_path):
@@ -20,20 +21,38 @@ class HiveConnector:
         self.password = config['connector']['password']
         self.auth = config['connector']['auth']
         self.temp_save_path = config['connector']['temp_save_path']
-        try:
-            self.conn = hive.Connection(host=self.host, 
+        # try:
+        print('running function: {}'.format(self.create_connection.__name__))
+        self.conn = self.create_connection()
+        print('Connection successful. conn: {}'.format(self.conn))
+        #     # conn = hive.Connection(host=host, port=port, username=username, password=password, database=database)
+        # except Exception as e:
+        #     print('Connection failed.')
+        #     print(e)
+        #     return
+
+    @retry(max_retries=3, retry_delay=5, exception_to_check=Exception)
+    def create_connection(self):
+        return hive.Connection(host=self.host, 
                                    port= self.port,
                                    configuration=self.hive_conf, 
                                    auth=self.auth,
                                    username=self.username,
                                    password=self.password
                                    )
-            print(self.conn)
-            # conn = hive.Connection(host=host, port=port, username=username, password=password, database=database)
-        except Exception as e:
-            print('Connection failed.')
-            print(e)
-            return
+
+    @retry(max_retries=3, retry_delay=10, exception_to_check=Exception)
+    def query_results(self, query):
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        columns=[desc[0] for desc in cursor.description]
+        print('results: {}'.format(results))
+        df = pd.DataFrame(results, columns=columns)
+        if df.empty:
+            print('Empty dataframe.')
+            raise Exception('No result set to fetch from. from dataframe')
+        return df
 
     def query_and_save(self, queries, i, tables):
         print('enter query_and_save')
@@ -42,29 +61,19 @@ class HiveConnector:
         if query == 'na':
             return
         try:
-            # start time
-            time_start = time.now()
-
-            cursor = self.conn.cursor()
-            cursor.execute(query)
-            results = cursor.fetchall()
-            columns=[desc[0] for desc in cursor.description]
-            # print(columns)
-            print(f'Query No: {i}')
-            # print current time
-            time_end = time.now()
-            print('results: {}'.format(results))
+            time_start = time.time()
+            print(f'Query No: {i+1}')
+            df = self.query_results(query)
+            time_end = time.time()
             print(f'Time Spent: {time_end - time_start}')
 
-            df = pd.DataFrame(results, columns=columns)
             self.save_data(df, table_name)
         except Exception as e:
             if e == 'No result set to fetch from.':
                 print('No result set to fetch from.')
                 return
-            print('Create dataframe failed.')
+            print('query_and_save function failed.')
             print(e)
-
 
     def query_data(self, query, save_to_file=False, save_file_name = 'temp.csv', fetch_result = 1):
         try:

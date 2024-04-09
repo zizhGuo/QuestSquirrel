@@ -24,3 +24,17 @@ build/
 dist/
 __pycache__/
 *.json
+GUI/
+modules/connector.py
+tool/zft/config_sql/*
+tool/yjby/config_sql/*
+tool/yjby/parser_scripts
+
+*.sql
+!templates/request_6_1/iter_1/stable/*.sql
+!templates/request_6_1/iter_1/stable/*.sql
+
+configs_old/
+data/
+modules_fairyland/copy/
+

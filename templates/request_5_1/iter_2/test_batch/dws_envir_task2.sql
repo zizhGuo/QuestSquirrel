@@ -1,14 +1,33 @@
-With B as (
+With break1 as (
+    select 
+        dt
+        ,uid
+        ,level
+        ,success
+        ,type
+        ,if(t2.player_id is not null, 1, 0) as is_welfare_users
+    from b1_statistics.ods_report_fairy_land_level_up_fail_temp t1
+    left join b1_statistics.ods_game_welfare_test t2
+    on t1.uid = t2.player_id
+    where
+        dt >= '{start_dt}' and dt <= '{end_dt}'
+        and type = 1
+)
+
+,break as (
+    select * from break1 where is_welfare_users = 0
+)
+
+,B as (
     select 
         dt as stats_dt,
         uid,
         level
     from
-        b1_statistics.ods_report_fairy_land_level_up_fail_temp_test
+       break
     where
-        dt between '{start_dt}' and '{end_dt}'
+        dt >= '{start_dt}' and dt <= '{end_dt}'
         and success = 'true'
-        and type = 1
 )
 
 ,A as (
@@ -17,14 +36,13 @@ With B as (
         t1.uid,
         t1.level
     from
-        b1_statistics.ods_report_fairy_land_level_up_fail_temp_test t1
+        break t1
     left join 
         B t2
     on t1.dt = t2.stats_dt and t1.uid = t2.uid and t1.level = t2.level
     where
-        t1.dt between '{start_dt}' and '{end_dt}'
+        t1.dt >= '{start_dt}' and t1.dt <= '{end_dt}'
         and t1.success = 'false'
-        and t1.type = 1
         and t2.uid is null
 )
 
@@ -48,13 +66,13 @@ from
                 from
                     guozizhun.dates_dimension
                 where
-                    dt between '{start_dt}' and '{end_dt}'
+                    dt >= '{start_dt}' and dt <= '{end_dt}'
             ) t2 on t1.dt <= t2.dt
     ) t
 group by
     stats_dt,
     uid
-having max(level) in (5, 10, 15, 19, 20)
+having max(level) in (select level from guozizhun.config_fairy_land where type = 1 and isbreak = 1)
 order by
     stats_dt
 )
@@ -75,8 +93,8 @@ order by
             from
                 b1_statistics.ods_log_gameonline t1
             where
-                dt between '{start_dt}' and '{end_dt}'
-                and gameid in (43, 44, 45, 46)
+                dt >= '{start_dt}' and dt <= '{end_dt}'
+                and gameid in (select id from guozizhun.config_fishery where fisheryname = 'fairy')
         ) t2 on t1.stats_dt = t2.dt and t1.uid = t2.uid
         left join b1_statistics.ods_game_welfare_test t3
         on t1.uid = t3.player_id
@@ -90,18 +108,9 @@ order by
     from
         C2 t1
     left join
-        b1_statistics.ods_report_fairy_land_level_up_fail_temp_test t2
-    on t1.stats_dt = t2.dt and t1.uid = t2.uid and t1.day_end_level_allhistory = t2.level and t2.type = 1
+        break1 t2
+    on t1.stats_dt = t2.dt and t1.uid = t2.uid and t1.day_end_level_allhistory = t2.level
     where t2.uid is null and t1.is_welfare_users = 0
-)
-
-,D2 as (
-    select t1.stats_dt, t1.day_end_level_allhistory, t2.level_name, count(t1.uid) as n_players_demonfairyland_level
-    from C2 t1
-    inner join guozizhun.config_fairy_land t2
-    on t1.day_end_level_allhistory = t2.level and t2.type = 1
-    where t1.is_welfare_users = 0
-    group by t1.stats_dt, t1.day_end_level_allhistory, t2.level_name
 )
 
 ,D as (
@@ -114,9 +123,6 @@ order by
         ,count(distinct uid) as n_players
     from
         A t1
-    left join b1_statistics.ods_game_welfare_test t3
-    on t1.uid = t3.player_id
-    where t3.player_id is null
     group by
         stats_dt, level
     union
@@ -129,9 +135,6 @@ order by
         ,count(distinct uid)
     from
         B t1
-    left join b1_statistics.ods_game_welfare_test t3
-    on t1.uid = t3.player_id
-    where t3.player_id is null
     group by
         stats_dt, level
     union
@@ -147,16 +150,22 @@ order by
     group by
         stats_dt, day_end_level_allhistory
 )
+
 ,D1 as (
 select
-    t1.stats_dt, t1.day_end_level_allhistory, t1.level_name, t1.n_players_demonfairyland_level + t2.n_players as n_players_demonfairyland_level
+    stats_dt, level, sum(n_players) as n_players_demonfairyland_level
 from
-    D2 t1
-inner join
-    D t2
-on
-    t1.stats_dt = t2.stats_dt and t1.day_end_level_allhistory = t2.level and t2.success_type = '成功'
+    D
+group by
+    stats_dt, level
+)
 
+,D2 as (
+select
+    t1.stats_dt, t1.level, t2.level_name, t1.n_players_demonfairyland_level
+from D1 t1
+inner join guozizhun.config_fairy_land t2
+on t1.level = t2.level and t2.type = 1
 )
 
 select
@@ -168,7 +177,6 @@ select
     ,t1.n_players
 from
     D t1
-left join D1 t3
-on t1.stats_dt = t3.stats_dt and t1.level = t3.day_end_level_allhistory
-where t1.stats_dt = '{end_dt}'
+left join D2 t3
+on t1.stats_dt = t3.stats_dt and t1.level = t3.level
 order by t1.stats_dt desc, t1.level, t1.rn

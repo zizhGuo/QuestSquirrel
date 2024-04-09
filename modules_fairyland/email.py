@@ -119,7 +119,8 @@ class Email:
                 send_file: {self.send_file}
                 send_file_format: {self.send_file_format}
                 '''
-
+    # TODO
+    # add update_message function
 
     def send_email(self):
         print(self.to_string())

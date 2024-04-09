@@ -1,0 +1,133 @@
+connector:
+  host: "172.19.121.24"
+  port: "10000"
+  hive_conf:
+    "hive.resultset.use.unique.column.names": "false"
+    "hive.execution.engine": "spark"
+    "spark.executor.instances": "6"
+    "spark.executor.cores": "8"
+    "spark.driver.cores": "8"
+  username: "hadoop"
+  password: "hadoop"
+  auth: "CUSTOM"
+
+test:
+  launch: 1
+  params:
+    end_dt: '2024-04-09'
+    gap_days: 8
+
+steps: 
+  query: 1
+  report: 1
+  visual: 0
+  email: 1
+
+module:
+  connector_module: 'connector'
+  query_module: 'query'
+  report_module: 'report'
+  visual_module: 'visual'
+  email_module: 'email_test'
+
+query:
+  task1:
+    temp_save_path: "data/quest_fairydemon"
+    tasks_num: 4
+    template_names: [
+      'dws_envir_breakthru_level_failure', 
+      'dws_envir_breakthru_level_non_operate',
+      'dws_envir_breakthru_spirit_failure',
+      'dws_envir_breakthru_spirit_non_operate'
+    ]
+    flags: [1, 1, 1, 1]
+    tables: [
+      'dws_envir_breakthru_level_failure.xlsx', 
+      'dws_envir_breakthru_level_non_operate.xlsx', 
+      'dws_envir_breakthru_spirit_failure.xlsx', 
+      'dws_envir_breakthru_spirit_non_operate.xlsx'
+    ]
+    info:
+      req_cat: "request_5_2"
+      req_iter: "iter_1"
+      req_status: "test_batch"
+    params:
+      NA: "NA"
+
+report:
+  report1:
+    desc: '仙魔大陆日报1期-report-测试'
+    temp_save_path: "data/quest_fairydemon"
+    output_file: 'quest_fairydemon_result_test.xlsx'
+    source_tables: [
+      'dws_envir_breakthru_level_non_operate.xlsx', 
+      'dws_envir_breakthru_level_failure.xlsx', 
+      'dws_envir_breakthru_spirit_non_operate.xlsx',
+      'dws_envir_breakthru_spirit_failure.xlsx'
+    ]
+    worksheet: ['ws11', 'ws12', 'ws13', 'ws14']
+    ws2title:
+      ws1: '仙魔大陆各模块数据大盘'
+      ws2: '仙魔大陆各礼包模块'
+      ws3: '仙魔各礼包ID TOP10礼包'
+      ws4: '仙魔各模块中礼包ID TOP10礼包'
+      ws5: '每日各境界人数分布情况'
+      ws6: '境界突破情况分布'
+      ws11: '仙魔大陆渔场消耗'
+      ws7: '各神识等级人数分布情况'
+      ws8: '神识突破情况分布'
+      ws9: '各灵宠等级人数分布情况'
+      ws10: '灵宠突破情况分布'
+      ws11: '境界突破补充活跃未操作'
+      ws12: '境界突破仅失败用用户行为分析'
+      ws13: '神识突破补充活跃未操作'
+      ws14: '神识突破仅失败用用户行为分析'
+    column: ['col13', 'col14', 'col15', 'col16']
+    col2names:
+      col1: ['日期', '模块名称', '点券兑换订单数', '点券兑换金额', '仙魔大陆整体订单占比', '仙魔大陆整体金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+      col2: ['日期', '模块名称', '礼包类型', '兑换订单数', '兑换金额', '模块订单占比', '模块兑换金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+      col3: ['日期' ,'序号' ,'礼包名称' ,'礼包类型' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
+      col4: ['日期' ,'模块名称' ,'序号' ,'礼包名称' ,'礼包单价' ,'兑换订单数' , '兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
+      col5: ['日期', '境界等级', '境界人数', '各境界人数与前一日对比']
+      col6: ['日期', '境界等级', '经历过对应境界等级总人数', '类型', '操作总次数', '操作总人数']
+      col7: ['日期' ,'总游戏人数' ,'人均游戏时长（分钟）' ,'与前一日对比' ,'总消耗金币' ,'与前一日对比' ,'净分','与前一日对比']
+      col8: ['日期' ,'渔场名称' ,'渔场游戏人数' ,'人均游戏时长（分钟）' ,'与前一日对比' ,'总消耗金币' ,'消耗金币占比' ,'与前一日对比' ,'净分','与前一日对比']
+      col9: ['日期', '神识等级', '神识人数', '各神识人数与前一日对比']
+      col10: ['日期', '神识等级', '经历过对应神识等级总人数', '类型', '操作总次数', '操作总人数']
+      col11: ['日期', '灵宠类型', '灵宠等级', '灵宠人数', '各灵宠人数与前一日对比']
+      col12: ['日期', '灵宠类型', '灵宠等级', '经历过对应灵宠等级总人数', '类型', '操作总次数', '操作总人数']
+      col13: ['日期', '境界等级', '未操作总人数', '活跃未操作人数']
+      col14: ['日期', '境界等级', '失败次数', '失败人数']
+      col15: ['日期', '神识等级', '未操作总人数', '活跃未操作人数']
+      col16: ['日期', '神识等级', '失败次数', '失败人数']
+
+visual:
+  vis1:
+    output_file: 'quest_fairydemon_visual.html'
+    temp_save_path: "data/quest_fairydemon"
+    template: 'visual_5_1_1'
+    files: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
+
+email_test:
+  email1:
+    desc: '仙魔大陆日报2.0-report-测试-'
+    # message: "测试QuestSquirrel"
+    message: "【仙魔大陆日报1.0+2.0-测试-1.1-1.2-1.5-1.6】附件包含报表及补充图示"
+    subject: "【仙魔大陆日报1.0+2.0-测试-1.1-1.2-1.5-1.6】仙魔洋商城&生态日报"
+    header_from: "dr.who"
+    sender_email: "guozizhun@cxxmobi.com"
+    header_to: "guozizhun@cxxmobi.com"
+    recipient_show: "[email_test]"
+    cc_show: "guozizhun@cxxmobi.com, 464096202@qq.com"
+    # cc_show: ""
+    user: "guozizhun@cxxmobi.com"
+    password: "SMBz75e5chpJzsr2"
+    to_addrs: "464096202@qq.com, guozizhun@cxxmobi.com"
+    # to_addrs: "tulinchao@cxxmobi.com, huangjinjing@cxxmobi.com"
+    email_company: "qq"
+    temp_save_path: "data/quest_fairydemon"
+    read_file: ['quest_fairydemon_result_test']
+    read_file_format: ['xlsx']
+    # report_save_path: "data/results"
+    send_file: ['仙魔大陆日报1-2期-测试']
+    send_file_format: ['xlsx']
