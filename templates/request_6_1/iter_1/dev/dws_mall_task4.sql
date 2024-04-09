@@ -19,7 +19,7 @@ on
 left join b3_statistics.ods_game_welfare_test t3
     on t1.uid = t3.player_id
 where
-    dt between '{start_dt}' and '{end_dt}'
+    dt >= '{start_dt}' and dt <= '{end_dt}'
     and costitemtype = 1012
 )
 

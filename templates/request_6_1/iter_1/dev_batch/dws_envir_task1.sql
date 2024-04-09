@@ -86,6 +86,7 @@ from
 
 select
     stats_dt
+    ,day_end_level_allhistory
     ,level_name
     ,n_players_demonfairyland_level
     ,n_players_diff

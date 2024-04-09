@@ -34,7 +34,7 @@ With fisherykill_prep as (
     group by dt, gameid
 )
 ,B2 as (
-    select dt, gameid, sum(itemcount * gold) as sum_acquired_gold_1
+    select dt, gameid, sum(itemcount * gold) as sum_common_special_gold
     from
     (   
         select
@@ -51,7 +51,7 @@ With fisherykill_prep as (
     group by dt, gameid
 )
 ,B3 as (
-    select dt, gameid, sum(itemcount * gold) as sum_acquired_gold_2
+    select dt, gameid, sum(itemcount * gold) as sum_space_special_gold
     from
     (   
         select
@@ -68,7 +68,7 @@ With fisherykill_prep as (
     group by dt, gameid
 )
 ,B4 as (
-    select dt, gameid, sum(itemcount * gold) as sum_acquired_gold_3
+    select dt, gameid, sum(itemcount * gold) as sum_space_battleship_gold
     from
     (   
         select
@@ -84,7 +84,7 @@ With fisherykill_prep as (
     group by dt, gameid
 )
 ,B5 as (
-    select dt, gameid, sum(itemcount * gold) as sum_acquired_gold_4
+    select dt, gameid, sum(itemcount * gold) as sum_drillskill_gold
     from
     (   
         select
@@ -101,7 +101,7 @@ With fisherykill_prep as (
     group by dt, gameid
 )
 ,B6 as (
-    select t1.dt, t1.gameid, sum(t2.valuemax * t3.gold) as sum_acquired_gold_5
+    select t1.dt, t1.gameid, sum(t2.valuemax * t3.gold) as sum_red_envolope_gold
     from b3_statistics.ods_log_red_envelope t1
     inner join guozizhun.config_fish_special_red_jackpot_3d t2
     on t1.redid = t2.id
@@ -110,21 +110,22 @@ With fisherykill_prep as (
     where t1.dt between '{start_dt}' and '{end_dt}' and t1.playertype != 4
     group by t1.dt, t1.gameid
 )
+
 ,C as (
     select dt, gameid, sum(sum_acquired_gold) AS sum_gain_gold
     from
     (
         select dt, gameid, sum_acquired_gold from B
         union all
-        select dt, gameid, sum_acquired_gold_1 from B2
+        select dt, gameid, sum_common_special_gold from B2
         union all
-        select dt, gameid, sum_acquired_gold_2 from B3
+        select dt, gameid, sum_space_special_gold from B3
         union all
-        select dt, gameid, sum_acquired_gold_3 from B4
+        select dt, gameid, sum_space_battleship_gold from B4
         union all
-        select dt, gameid, sum_acquired_gold_4 from B5
+        select dt, gameid, sum_drillskill_gold from B5
         union all
-        select dt, gameid, sum_acquired_gold_5 from B6
+        select dt, gameid, sum_red_envolope_gold from B6
     ) t
     group by dt, gameid
 )
@@ -149,8 +150,8 @@ With fisherykill_prep as (
     ,A.sum_consumed_gold / sum(A.sum_consumed_gold) over(partition by D.dt) as consumed_gold_ratio
     ,C.sum_gain_gold
     ,if(C1.sum_buff_gold is not null, C1.sum_buff_gold, 0) as sum_buff_gold
-    ,C.sum_gain_gold + if(C1.sum_buff_gold is not null, C1.sum_buff_gold, 0) - A.sum_consumed_gold as sum_net_gold
-    ,lag(C.sum_gain_gold + if(C1.sum_buff_gold is not null, C1.sum_buff_gold, 0) - A.sum_consumed_gold) over(partition by D.gameid order by D.dt) as last_sum_net_gold
+    ,C.sum_gain_gold - A.sum_consumed_gold as sum_net_gold
+    ,lag(C.sum_gain_gold - A.sum_consumed_gold) over(partition by D.gameid order by D.dt) as last_sum_net_gold
 
     from D
     inner join A
@@ -189,10 +190,10 @@ SELECT
     t2.fishery_name_new, 
     format_number(t1.n_fishery_uids, 0) as n_fishery_uids, 
     format_number(COALESCE(t1.n_fishery_uids_diff, 0), 0) as n_fishery_uids_diff, 
-    FORMAT_NUMBER(CAST(t1.avg_online_minutes AS DECIMAL(17, 15)), 2) as avg_online_minutes, 
-    FORMAT_NUMBER(CAST(COALESCE(t1.avg_online_minutes_diff, 0) AS DECIMAL(17, 15)), 2) as avg_online_minutes_diff, 
+    FORMAT_NUMBER(CAST(t1.avg_online_minutes AS DECIMAL(20, 15)), 2) as avg_online_minutes, 
+    FORMAT_NUMBER(CAST(COALESCE(t1.avg_online_minutes_diff, 0) AS DECIMAL(20, 15)), 2) as avg_online_minutes_diff, 
     format_number(t1.sum_consumed_gold, 0) as sum_consumed_gold, 
-    CONCAT(FORMAT_NUMBER(CAST(t1.consumed_gold_ratio AS DECIMAL(17, 15))*100, 2), '%') as consumed_gold_ratio,
+    CONCAT(FORMAT_NUMBER(CAST(t1.consumed_gold_ratio AS DECIMAL(20, 15))*100, 2), '%') as consumed_gold_ratio,
     format_number(COALESCE(t1.sum_consumed_gold_diff, 0), 0) as sum_consumed_gold_diff, 
     format_number(t1.sum_net_gold, 0) as sum_net_gold, 
     format_number(COALESCE(t1.sum_net_gold_diff, 0), 0) as sum_net_gold_diff
@@ -200,5 +201,5 @@ FROM F2 t1
 left join guozizhun.config_fishery_3d t2
 on t1.gameid = t2.gameid
 where
-  t1.gameid in (132, 133, 134)
+  t1.gameid in {fishery_ids}
 order by t1.dt desc, t1.gameid

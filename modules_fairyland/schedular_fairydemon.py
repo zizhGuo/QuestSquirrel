@@ -56,8 +56,14 @@ class Task:
         # self.connector = HiveConnector(self.config, self.root_path, module)
         self.connector = connector
         self.template_names = self.query_manager.template_names
-        self.tasks_num = int(self.config[module.query_module][sub_task]["tasks_num"])
         self.tables = self.config[module.query_module][sub_task]["tables"]
+        self.tasks_num = int(self.config[module.query_module][sub_task]["tasks_num"])
+        assert self.tasks_num == len(self.tables), "Tasks num is not equal to tables num"
+        assert self.tasks_num == len(self.template_names), "Tasks num is not equal to template names num"
+        if self.config[module.query_module][sub_task].get("flags") is not None:
+            self.flags = self.config[module.query_module][sub_task]["flags"]
+        else:
+            self.flags = [1 for _ in range(self.tasks_num)]
         self.temp_save_path = self.config[module.query_module][sub_task]["temp_save_path"]
 
     def run_querys(self):
@@ -65,7 +71,7 @@ class Task:
             try:
                 print(f'running querys: {i}')
                 print(self.quries[self.template_names[i]])
-                self.connector.query_and_save(self.quries, self.template_names, i, self.tables, self.temp_save_path)
+                self.connector.query_and_save(self.quries, self.template_names, i, self.tables, self.flags, self.temp_save_path)
                 # print(df)
                 print('running querys done')
                 print('-----------------------------------')

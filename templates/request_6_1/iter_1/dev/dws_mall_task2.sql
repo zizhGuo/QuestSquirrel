@@ -10,7 +10,7 @@ from
 join
   guozizhun.config_pacific_3d t2
 where
- t1.dt between '{start_dt}' and '{end_dt}'
+ t1.dt >= '{start_dt}' and t1.dt <= '{end_dt}'
 
 )
 
@@ -28,7 +28,7 @@ select
 from
     pre t2
 left join
-    (select goods, costitemtype, dt, uid, count, costcount from b3_statistics.ods_log_shop where dt between '{start_dt}' and '{end_dt}') t1
+    (select goods, costitemtype, dt, uid, count, costcount from b3_statistics.ods_log_shop where dt >= '{start_dt}' and dt <= '{end_dt}') t1
 on
     t1.goods = t2.goodsid and t1.costitemtype = 1012 and t1.dt = t2.dt
 left join b3_statistics.ods_game_welfare_test t3

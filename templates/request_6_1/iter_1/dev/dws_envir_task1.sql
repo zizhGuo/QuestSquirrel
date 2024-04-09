@@ -18,7 +18,7 @@ from
                 from
                     guozizhun.dates_dimension
                 where
-                    dt between '{start_dt}' and '{end_dt}'
+                    dt >= '{start_dt}' and dt <= '{end_dt}'
             ) t2 on t1.dt <= t2.dt
     ) t
 group by
@@ -33,7 +33,7 @@ select
     ,t1.uid
     ,0 as day_end_level_allhistory
 from (select uid, dt from b3_statistics.ods_log_common_obtain_reward where configid = 0 and logtype = 'pacific_clean_reward') t1
-inner join (select dt as stats_dt from guozizhun.dates_dimension where dt between '{start_dt}' and '{end_dt}') t2 on t1.dt <= t2.stats_dt
+inner join (select dt as stats_dt from guozizhun.dates_dimension where dt >= '{start_dt}' and dt <= '{end_dt}') t2 on t1.dt <= t2.stats_dt
 left join b3_statistics.ods_log_pacific_clean_level t3
 on t1.uid = t3.uid and t3.dt <= t2.stats_dt
 where t3.uid is null
@@ -56,8 +56,8 @@ where t3.uid is null
             from
                 b3_statistics.ods_log_gameonline t1
             where
-                dt between '{start_dt}' and '{end_dt}'
-                and gameid in (132, 133, 134)
+                dt >= '{start_dt}' and dt <= '{end_dt}'
+                and gameid in (select gameid from guozizhun.config_fishery_3d where fisheryname = 'pacific')
                 and playertype <> 4
         ) t2 on t1.stats_dt = t2.dt and t1.uid = cast(t2.uid as bigint)
         left join b3_statistics.ods_game_welfare_test t3
@@ -86,6 +86,7 @@ from
 
 select
     stats_dt
+    ,day_end_level_allhistory
     ,level_name
     ,n_players_demonfairyland_level
     ,n_players_diff

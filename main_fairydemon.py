@@ -64,21 +64,21 @@ def main():
     config['start_dt'] = param_dt['start_dt']
 
     module = Module(config)
+    scheduler = TaskScheduler(config = config, root_path = CURRENT_FILE_DIR, param_dt = param_dt, module = module)
+    reporter = ReportSchedular(config = config, root_path = CURRENT_FILE_DIR, module = module)
+    visulizer = Visualizer(config = config, root_path = CURRENT_FILE_DIR, module = module)
+    emailer = EmailScheduler(config = config, root_path = CURRENT_FILE_DIR, module = module)
     
     if config['steps']['query']:
-        scheduler = TaskScheduler(config = config, root_path = CURRENT_FILE_DIR, param_dt = param_dt, module = module)
         scheduler.run_tasks()
 
     if config['steps']['report']:
-        reporter = ReportSchedular(config = config, root_path = CURRENT_FILE_DIR, module = module)
         reporter.run()
     
     if config['steps']['visual']:
-        visulizer = Visualizer(config = config, root_path = CURRENT_FILE_DIR, module = module)
         visulizer.run()
 
     if config['steps']['email']:
-        emailer = EmailScheduler(config = config, root_path = CURRENT_FILE_DIR, module = module)
         emailer.send_email()
 
 if __name__ == "__main__":
