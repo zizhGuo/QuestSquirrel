@@ -63,7 +63,7 @@ B as (
                 b1_statistics.ods_log_gameonline t1
             where
                 dt between '{start_dt}' and '{end_dt}'
-                and gameid in (43, 44, 45, 46)
+                and gameid in (select id from guozizhun.config_fishery where fisheryname = 'fairy')
         ) t2 on t1.stats_dt = t2.dt and t1.uid = t2.uid
         left join b1_statistics.ods_game_welfare_test t3
         on t1.uid = t3.player_id
@@ -96,7 +96,5 @@ select
     ,n_players_diff
 from
     D
-where
-    stats_dt = '{end_dt}'
 order by stats_dt desc, day_end_level_allhistory
 

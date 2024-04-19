@@ -50,7 +50,7 @@ left join guozizhun.config_item_gold t2
 on t1.bonusid = t2.itemid
 where
     t1.dt between '{start_dt}' and '{end_dt}'
-    and t1.gameid in (43, 44, 45, 46)
+    and t1.gameid in (select id from guozizhun.config_fishery where fisheryname = 'fairy')
     and t1.bonusid not in (1001, 0, 5321)
 )
 
@@ -62,7 +62,7 @@ where
         ,sum(if(itemid = 1016, `count`, 0)) as sum_gold_1016
     from A
     where
-        gameid in (43, 44, 45, 46)
+        gameid in (select id from guozizhun.config_fishery where fisheryname = 'fairy')
     group by
         dt
         ,gameid
@@ -77,7 +77,7 @@ where
         b1_statistics.ods_log_fisherykill_test
     where
         dt between '{start_dt}' and '{end_dt}'
-        and gameid in (43, 44, 45, 46)
+        and gameid in (select id from guozizhun.config_fishery where fisheryname = 'fairy')
         and bonusid = 1001
     group by
         dt
@@ -134,7 +134,7 @@ where
         ,sum(onlinemilliseconds) / 60000 / count(distinct uid) as avg_online_minutes
     from b1_statistics.ods_log_gameonline 
     where dt between '{start_dt}' and '{end_dt}'
-        and gameid in (43, 44, 45, 46) group by dt, gameid
+        and gameid in (select id from guozizhun.config_fishery where fisheryname = 'fairy') group by dt, gameid
 )
 
 ,E as (
@@ -146,7 +146,7 @@ where
         b1_statistics.ods_log_fisherykill_test
     where
         dt between '{start_dt}' and '{end_dt}'
-        and gameid in (43, 44, 45, 46)
+        and gameid in (select id from guozizhun.config_fishery where fisheryname = 'fairy')
     group by
         dt
         ,gameid
@@ -209,6 +209,5 @@ select
 from F
 left join guozizhun.config_fishery t
 on F.gameid = t.id and t.type = 1
-where dt = '{end_dt}'
 order by
     dt desc, t.id

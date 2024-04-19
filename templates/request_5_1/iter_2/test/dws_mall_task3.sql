@@ -4,12 +4,12 @@ select
     ,t1.sub_func_name
     ,t1.goodsid
     ,t1.goodsname
-    ,t2.stamprice
+    ,t2.stamps_price as stamprice
 from
     guozizhun.config_xianmo t1
 inner join
-    guozizhun.config_shop_price_zft t2
-on t1.goodsid = t2.goodsid
+    b1_statistics.ods_config_shop t2
+on t1.goodsid = t2.goods_id and t2.game_id = 1000
 )
 , A1 as (
 select
