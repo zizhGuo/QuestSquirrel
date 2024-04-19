@@ -32,7 +32,7 @@ select
     t2.stats_dt
     ,t1.uid
     ,0 as day_end_level_allhistory
-from (select uid, dt from b3_statistics.ods_log_common_obtain_reward where configid = 0 and logtype = 'pacific_clean_reward') t1
+from guozizhun.dwd_3d_pacific_daily_lv1_users t1
 inner join (select dt as stats_dt from guozizhun.dates_dimension where dt >= '{start_dt}' and dt <= '{end_dt}') t2 on t1.dt <= t2.stats_dt
 left join b3_statistics.ods_log_pacific_clean_level t3
 on t1.uid = t3.uid and t3.dt <= t2.stats_dt

@@ -3,19 +3,15 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font, Border, Side, Alignment
+import functools
 
 import sys
 print(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'transform')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'transform')))
 
+from transform.base_transform import BaseTransform
 '''
 '''
-THICK_BORDER = Border(
-    left=Side(style='thin'), 
-    right=Side(style='thin'),
-    top=Side(style='thin'), 
-    bottom=Side(style='thin')
-)
 def adjust_column_width(ws):
     # 计算并调整每列宽度
     column_widths = {}
@@ -30,25 +26,6 @@ def adjust_column_width(ws):
     # 设置列宽（略大于最大长度以避免内容截断）
     for col_letter, width in column_widths.items():
         ws.column_dimensions[col_letter].width = width*2  # 可根据需要调整额外宽度
-
-def add_dataframe_to_worksheet(ws, df, start_row):
-    current_row = start_row 
-    for _, r in enumerate(dataframe_to_rows(df, index=False, header=True)):
-        ws.append(r)
-        # print(i)
-        # print(ws[i])
-        if current_row == start_row:
-            for cell in ws[current_row]:
-                cell.font = Font(bold=True)
-                cell.border = THICK_BORDER
-        current_row += 1
-    # 在不同DataFrame之间添加空行作为分隔
-    ws.append([])
-    return current_row + 1
-    for column_cells in ws.columns:
-        length = max(len(str(cell.value)) for cell in column_cells)*2.2
-        # print(f"length: {length}")
-        ws.column_dimensions[column_cells[0].column_letter].width = length
 
 class ReportSchedular:
     def __init__(self, config, root_path, module) -> None:
@@ -72,14 +49,15 @@ class ReportSchedular:
                 print(f'gen report run failed. {i}')
                 print(e)
 
+
 class ReportGenerator:
     def __init__(self, config, root_path, module, sub_report):
         self.module = module
         self.sub_report = sub_report
-        if config[module.report_module][sub_report].get('transform_module') is not None:
-            print('entered!!!!!!!!!!!!!!!transoform!!!!!')
-            self.transform_module = config[module.report_module][sub_report]['transform_module']
-            self.transform_class = config[module.report_module][sub_report]['transform_class']
+        if config[module.report_module][sub_report].get('transform') is not None:
+            print('successfully import transform class.')
+            self.transform_dict = config[module.report_module][sub_report]['transform']
+            print('transform_dict: {}'.format(self.transform_dict))
         self.tables = config[module.report_module][sub_report]['source_tables']
         # filter out the 'na' tables
         # self.tables = [table for table in self.tables if table != 'na']
@@ -112,42 +90,26 @@ class ReportGenerator:
                     print(f"file {file} not existed")
                     continue
                 df = pd.read_excel(_dir)
+
+                i = self.tables.index(file)
                 # rename columns
-                df.columns = self.col2names[self.column[self.tables.index(file)]]
+                df.columns = self.col2names[self.column[i]]
                 
                 # insert dataframe edit class
                 # df = new_class(df).edit()
-
-                if hasattr(self, 'transform_module') and self.transform_class[self.tables.index(file)] != 'na':
-                    print('file is {}'.format(file))
-                    transformer = self._create_transform_instance(file)(df)
-                    df = transformer.edit()
-                    transformer.show()
-                start_row = add_dataframe_to_worksheet(ws, df, start_row)
-            # 根据df是否为单表还是多表，增加add_dataframe_to_worksheet的处理逻辑
-            # adjust_column_width(ws)
-
-            # print(f'ws.columns:{ws.columns}')
-            # for column_cells in ws.columns:
-            #     length = max(len(str(cell.value)) for cell in column_cells)
-            #     print(f"length: {length}")
-            #     ws.column_dimensions[column_cells[0].column_letter].width = length
-
-        # ws = your current worksheet
-        # dims = {}
-        # for row in ws.rows:
-        #     for cell in row:
-        #         if cell.value:
-        #             dims[cell.column] = max((dims.get(cell.column, 0), len(str(cell.value))))    
-        # for col, value in dims.items():
-        #     ws.column_dimensions[col].width = value
+                # if dict has tranform class, then create child class and edit
+                if hasattr(self, 'transform_dict') and type(self.transform_dict.get(file)) == list:
+                    transform_instance = self._create_transform_instance(file)()
+                    start_row = transform_instance.run(ws, df, start_row)
+                # else use default add_dataframe_to_worksheet
+                else:
+                    transform_instance = BaseTransform()
+                    start_row = transform_instance.run(ws, df, start_row)
 
         dir_path = os.path.join(self.root_path, self.temp_save_path, self.end_dt)
         file_path = os.path.join(dir_path, self.output_dir)
         print(f"file_path: {file_path}")
         wb.save(f"{file_path}")
-        
-
     
     def generate_god_batch(self, df_write, sheet_name, mapper, write_xlsx):
         tables = {}
@@ -166,12 +128,10 @@ class ReportGenerator:
             write_xlsx(tables_new, self.root_path, self.output_dir, file)
     
     def _create_transform_instance(self, file):
-        module_path = os.path.join(os.path.dirname(__file__), '..', 'transform')
-        if module_path not in sys.path:
-            sys.path.append(module_path)
         import importlib
-        module = importlib.import_module(self.transform_module)
-        Class = getattr(module, self.transform_class[self.tables.index(file)])
+        print(self.transform_dict[file][0])
+        module = importlib.import_module(self.transform_dict[file][0])
+        Class = getattr(module, self.transform_dict[file][1])
         return Class
 
 
