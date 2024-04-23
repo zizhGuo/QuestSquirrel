@@ -51,18 +51,14 @@ class BreakthruFailureIntervalConsumption(BaseTransform):
     ]
 
     groupby_target = [
-        (['日期',  '失败次数', '礼包去重序列'], '玩家名单'),
-        (['日期', '失败次数'], '礼包去重序列')
+        (['失败次数', '礼包去重序列'], '玩家名单'),
+        (['失败次数', '玩家名单'], '礼包去重序列')
     ]
     
     col = ['日期', '境界等级', '等级名称', '玩家名单', '失败次数', '第几次失败', '失败时消耗材料', '礼包去重序列', '礼包', '购买订单数', '累计订单金额']
     
     def __init__(self):
         super(BaseTransform, self).__init__()
-
-    # @BaseTransform.merge_cells_general
-    # def post_edit(self, *args):
-    #     pass
         
     @BaseTransform.drop_columns
     def drop(self, *args):
@@ -70,8 +66,6 @@ class BreakthruFailureIntervalConsumption(BaseTransform):
 
     @BaseTransform.select_columns
     def select(self, df, columns_dict):
-        # logging.info('print columns_dict: {}'.format(columns_dict))
-        # print('print columns_dict: {}'.format(columns_dict))
         pass
 
     @insert_row
@@ -80,16 +74,10 @@ class BreakthruFailureIntervalConsumption(BaseTransform):
 
     @df2ws
     @BaseTransform.merge_cells_general
-    def edit_ws(self):
+    def edit_ws(self, ws, df, start_row, *args, **kwargs):
         print('enter edit_ws')
         pass
     
-    @arg_test_outer
-    @BaseTransform.arg_test_inner
-    def _test(self, ws, df, start_row, groupby_target):
-        print('enter _test main')
-        pass
-
     def run(self, ws, df, start_row):
         start_row = start_row
         df = self.drop(df, ['境界等级'])
@@ -100,11 +88,11 @@ class BreakthruFailureIntervalConsumption(BaseTransform):
                     '等级名称': level
                 }
                 _df = self.select(df, columns_dict)
-                _df = self.drop(_df, ['等级名称'])
-                start_row = self.insert(ws, start_row, f'境界等级: {level}')
-                ret_row = self.edit_ws(ws, _df, start_row, self.groupby_target)
+                _df = self.drop(_df, ['等级名称', '日期'])
+                start_row = self.insert(ws, start_row, f'日期：{dt} 境界等级: {level}')
+                ret_row = self.edit_ws(ws, _df, start_row, 
+                                       groupby_target = self.groupby_target,
+                                       alignment = 'general,center'
+                )
                 start_row = ret_row
-        return ret_row
-        ret_row = super(LevelFailureTransform, self).run(ws, df, start_row)
-        self.post_edit(ws, df, start_row, groupby_target = self.groupby_target)
         return ret_row
