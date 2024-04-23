@@ -17,7 +17,7 @@ sql_dir = os.path.join(PARRENT_FILE_DIR, 'config_sql', CUR_VERSION)
 
 config_file = 'config_fishery.xlsx'
 sheet_name = 'config_fishery_base'
-columns = ['id', 'name', 'seaId', 'fisheryName', 'seaName']  # Column indices for 'id', 'name', and 'functionId1'
+columns = ['id', 'name', 'seaId', 'fisheryName', 'seaName', 'openClose']  # Column indices for 'id', 'name', and 'functionId1'
 MY_TABLE_NAME = 'guozizhun.config_fishery'
 sql_file1 = 'config_fishery_1_drop.sql'
 sql_file2 = 'config_fishery_2_create.sql'
@@ -41,7 +41,8 @@ name string,
 type int,
 seaid int,
 fisheryname string,
-seaname string
+seaname string,
+openclose int
 )
 row format delimited
 fields terminated by '|'
@@ -62,14 +63,14 @@ stored as textfile
     df = df.reset_index(drop=True)
     df = df[columns]
 
-    sql += f"INSERT INTO {MY_TABLE_NAME} (id, name, type, seaid, fisheryname, seaname) VALUES\n"
+    sql += f"INSERT INTO {MY_TABLE_NAME} (id, name, type, seaid, fisheryname, seaname, openclose) VALUES\n"
     for index, row in df.iterrows():
-        id, name, seaid, fisheryname, seaname = row
+        id, name, seaid, fisheryname, seaname, openclose = row
         if index != 0:
             # Format the SQL insert statement
-            sql += f",({id}, '{name}', 1, {seaid}, '{fisheryname}', '{seaname}')\n"
+            sql += f",({id}, '{name}', 1, {seaid}, '{fisheryname}', '{seaname}', {openclose})\n"
         else:
-            sql += f"({id}, '{name}', 1, {seaid}, '{fisheryname}', '{seaname}')\n"
+            sql += f"({id}, '{name}', 1, {seaid}, '{fisheryname}', '{seaname}', {openclose})\n"
         # sql_statements.append(sql)
     # return sql_statements
     return sql1, sql2, sql

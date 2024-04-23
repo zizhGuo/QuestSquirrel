@@ -132,24 +132,33 @@ class BaseTransform:
             先于func执行
         """
         @functools.wraps(func)
-        def wrapper(self, ws, df, start_row, groupby_target, *args, **kwargs):
+        def wrapper(self, ws, df, start_row, *args, **kwargs):
             # print('groupby_target: {}'.format(groupby_target))
-            cur_row = start_row 
-            for pair in groupby_target:
-                groupby_cols, target_col = pair[0], pair[1]
-                result = df.groupby(groupby_cols).apply(lambda x: pd.Series([x.index[0], x.index[-1]], index=['First_Index', 'Last_Index'])).reset_index()
-                print('results: {}'.format(result))
-                result_set = [(row['First_Index']+cur_row+1, row['Last_Index']+cur_row+1) for _, row in result.iterrows()]
-                print('result_set: {}'.format(result_set))
-                column_index = df.columns.get_loc(target_col)+1
-                print('cur_row: {}'.format(cur_row))
-                for start, end in result_set:
-                    ws.merge_cells(start_row=start, 
-                                end_row=end, 
-                                start_column=column_index, 
-                                end_column=column_index)
+            cur_row = start_row
+            if not 'groupby_target' in kwargs:
+                print('groupby_target not in kwargs')
+                print('kwargs: {}'.format(kwargs))
+            else:
+                for pair in kwargs['groupby_target']:
+                    groupby_cols, target_col = pair[0], pair[1]
+                    result = df.groupby(groupby_cols).apply(lambda x: pd.Series([x.index[0], x.index[-1]], index=['First_Index', 'Last_Index'])).reset_index()
+                    print('results: {}'.format(result))
+                    result_set = [(row['First_Index']+cur_row+1, row['Last_Index']+cur_row+1) for _, row in result.iterrows()]
+                    print('result_set: {}'.format(result_set))
+                    column_index = df.columns.get_loc(target_col)+1
+                    print('cur_row: {}'.format(cur_row))
+                    for start, end in result_set:
+                        ws.merge_cells(start_row=start, 
+                                    end_row=end, 
+                                    start_column=column_index, 
+                                    end_column=column_index)
+                        if 'alignment' in kwargs:
+                            _horizontal, _vertical = kwargs['alignment'].split(',')[0], kwargs['alignment'].split(',')[1]
+                            _cell = ws.cell(row=start, column=column_index)
+                            _cell.alignment = Alignment(horizontal=_horizontal, 
+                                                    vertical=_vertical)
             # func(self, ws, df, start_row, groupby_target, *args, **kwargs)
-            func(self, *args, **kwargs)
+            func(self, ws, df, start_row, *args, **kwargs)
         return wrapper
 
     @df2ws
