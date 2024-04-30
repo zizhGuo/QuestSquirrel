@@ -11,8 +11,9 @@ from modules_fairyland.config import ConfigManager
 from modules_fairyland.schedular_fairydemon import TaskScheduler
 from modules_fairyland.date_converter import date2str, dt_minus_days
 from modules_fairyland.report_fairydemon import ReportSchedular
-from modules_fairyland.visualizer_fairydemon import Visualizer
+# from modules_fairyland.visualizer_fairydemon import Visualizer
 from modules_fairyland.email import EmailScheduler
+from modules_fairyland.visualizer_updated import VisualizerScheduler
 
 
 from datetime import datetime
@@ -64,7 +65,6 @@ def main():
     config['start_dt'] = param_dt['start_dt']
 
     module = Module(config)
-    
     if config['steps']['query']:
         scheduler = TaskScheduler(config = config, root_path = CURRENT_FILE_DIR, param_dt = param_dt, module = module)
         scheduler.run_tasks()
@@ -74,7 +74,8 @@ def main():
         reporter.run()
     
     if config['steps']['visual']:
-        visulizer = Visualizer(config = config, root_path = CURRENT_FILE_DIR, module = module)
+        # visulizer = Visualizer(config = config, root_path = CURRENT_FILE_DIR, module = module)
+        visulizer = VisualizerScheduler(config = config, root_path = CURRENT_FILE_DIR, module = module)
         visulizer.run()
 
     if config['steps']['email']:
