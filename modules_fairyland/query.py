@@ -11,9 +11,9 @@ class QueryManager:
             self.parameters = {**param_dt, **self.params}
             self.root_path = root_path
             
-            print(self.template_names)
-            print(self.info)
-            print(self.parameters)
+            # print(self.template_names)
+            # print(self.info)
+            # print(self.parameters)
 
 
             # load queries

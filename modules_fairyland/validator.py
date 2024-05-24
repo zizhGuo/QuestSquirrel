@@ -10,7 +10,7 @@ class Validator:
 
     def __set__(self, obj, value):
         self.validate(value)
-        self.data[obj] = value
+        # self.data[obj] = value
         setattr(obj, self.name, value)
 
     @abstractmethod
@@ -57,5 +57,5 @@ class Test:
         print(self.t_params)
 
 # t = Test({'c': {'b': 1}})
-t = Test()
-t.print()
+# t = Test()
+# t.print()

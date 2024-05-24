@@ -10,6 +10,19 @@ print(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'transform')
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'transform')))
 
 from transform.base_transform import BaseTransform
+
+
+import logging
+
+logger = logging.getLogger('report_logger')
+logger.setLevel(logging.DEBUG)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+
+
 '''
 '''
 def adjust_column_width(ws):
@@ -93,13 +106,19 @@ class ReportGenerator:
 
                 i = self.tables.index(file)
                 # rename columns
-                df.columns = self.col2names[self.column[i]]
+                if isinstance(self.col2names[self.column[i]], list):
+                    df.columns = self.col2names[self.column[i]]
                 
                 # insert dataframe edit class
                 # df = new_class(df).edit()
                 # if dict has tranform class, then create child class and edit
                 if hasattr(self, 'transform_dict') and type(self.transform_dict.get(file)) == list:
-                    transform_instance = self._create_transform_instance(file)()
+                    _func = lambda l, x: l+[x]
+                    base_dir = os.path.join(self.root_path, self.temp_save_path, self.end_dt)
+                    print('base_dir:', base_dir)
+                    kwargs = {file: _func(_func(self.transform_dict[file], self.end_dt), base_dir)}
+                    logger.debug(f"file: {file} | kwargs: {kwargs}")
+                    transform_instance = self._create_transform_instance(file)(**kwargs)
                     start_row = transform_instance.run(ws, df, start_row)
                 # else use default add_dataframe_to_worksheet
                 else:
@@ -132,6 +151,7 @@ class ReportGenerator:
         print(self.transform_dict[file][0])
         module = importlib.import_module(self.transform_dict[file][0])
         Class = getattr(module, self.transform_dict[file][1])
+        print('successfully import transform class.')
         return Class
 
 

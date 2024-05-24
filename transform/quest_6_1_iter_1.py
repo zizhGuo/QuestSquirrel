@@ -9,7 +9,7 @@ class Envir4:
     1. drop_columns
     2. df2ws
     """
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.drop_columns = ['渔场id']
         
     @drop_columns
@@ -29,7 +29,7 @@ class Envir4:
 
 # class Envir4(BaseTransform):
 #     """6-1-iter1-生态4表-去掉渔场id列"""
-#     def __init__(self):
+#     def __init__(self, *args, **kwargs):
 #         super(BaseTransform, self).__init__()
         
 #     @BaseTransform.drop_columns

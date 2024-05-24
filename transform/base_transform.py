@@ -43,6 +43,9 @@ def df2ws(func):
                 for cell in ws[current_row]:
                     cell.font = Font(bold=True)
                     cell.border = THICK_BORDER
+            # if current_row != start_row:
+            #         for cell in ws[current_row]:
+            #             cell.border = THICK_BORDER
             current_row += 1
         ws.append([])
 
@@ -57,8 +60,8 @@ def insert_row(func):
     @functools.wraps(func)
     def wrapper(self, ws, start_row, content, *args):
         ws.append([content])
-        for cell in ws[start_row]:
-            cell.font = Font(bold=True)
+        # for cell in ws[start_row]:
+        #     cell.font = Font(bold=True)
         func(self, *args)
         return start_row + 1
     return wrapper
