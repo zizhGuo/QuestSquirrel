@@ -11,9 +11,8 @@ from modules_fairyland.config import ConfigManager
 from modules_fairyland.schedular_fairydemon import TaskScheduler
 from modules_fairyland.date_converter import date2str, dt_minus_days
 from modules_fairyland.report_fairydemon import ReportSchedular
-# from modules_fairyland.visualizer_fairydemon import Visualizer
-from modules_fairyland.email import EmailScheduler
 from modules_fairyland.visualizer_updated import VisualizerScheduler
+from modules_fairyland.email import EmailScheduler
 
 
 from datetime import datetime

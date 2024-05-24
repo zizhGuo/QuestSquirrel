@@ -1,3 +1,8 @@
+import os
+import sys
+print(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'multiphases')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'multiphases')))
+
 from modules_fairyland.connector import HiveConnector
 from modules_fairyland.query import QueryManager
 from modules_fairyland.processor import DataProcessor
@@ -5,6 +10,26 @@ from modules_fairyland.visualizer import Visualizer
 from modules_fairyland.report import ReportGenerator
 from modules_fairyland.email import Email
 from modules_fairyland.flag import Flag
+
+import time
+
+from abc import abstractmethod
+import threading
+from queue import SimpleQueue
+import traceback
+
+import logging
+
+logger = logging.getLogger('multithreading_logger')
+logger.setLevel(logging.DEBUG)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+
+MAX_CONCURRENT_TASKS = 5
+
 
 """_summary_
 更新task schedule调度方式
@@ -15,34 +40,111 @@ from modules_fairyland.flag import Flag
 
 class TaskScheduler:
     def __init__(self, config, root_path, param_dt, module) -> None:
-        self.tasks = []
-        self.connector = HiveConnector(config, root_path, module)
-        for sub_task, _sub_config in config[module.query_module].items():
-            _ = Task(config, root_path, param_dt, self.connector, module, sub_task)
-            self.tasks.append(_)
-
-    def run_tasks(self):
-        for i in range(len(self.tasks)):
-            print('run tasks')
-            try:
-                print(f'running task: {i}')
-                self.tasks[i].run_querys()
-                print('-----------------------------------')
-                print('-----------------------------------')
-                print('-----------------------------------')
-                print('-----------------------------------')
-                print('-----------------------------------')
-                print('-----------------------------------')
-            except Exception as e:
-                print(f'run task failed. {i}')
-                print(e)
-
-class Task:
-    def __init__(self, config, root_path, param_dt, connector, module, sub_task):
+        # self.tasks = []
+        # self.connector = HiveConnector(config, root_path, module)
         self.config = config
         self.root_path = root_path
         self.param_dt = param_dt
         self.module = module
+
+        # TODO init lock, semaphore
+        self.semaphore = threading.Semaphore(MAX_CONCURRENT_TASKS)
+        self.task_queue = SimpleQueue()
+        self.lock = threading.Lock()
+
+
+    def run_tasks(self):
+        threads = []
+        logger.debug('TaskScheduler: run tasks entered')
+        start = time.time()
+
+        for sub_task, _sub_config in self.config[self.module.query_module].items():
+            # query_tasks_type = self.config[self.module.query_module][sub_task].get('type', 'default')
+            thread = threading.Thread(target=self.execute_report, args=(self.config, self.root_path, self.param_dt, self.module, sub_task))
+            logger.debug(f'thread created: {thread}')
+            logger.debug(f'current sub_task created: {sub_task}')
+            logger.debug('----------------------')
+            threads.append(thread)
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+
+            # TODO condition: query_tasks_type == 'hive_on_spark'
+            # _ = TaskHive(config, root_path, param_dt, self.connector, module, sub_task, )
+            # self.tasks.append(_)
+
+            # TODO condition: query_tasks_type == 'spark_on_hive' or 'default'
+        end = time.time()
+        print('spent time: ', end-start)
+        # self.connector.close()
+
+    def execute_report(self, config, root_path, param_dt, module, sub_task):
+        logger.debug('execute_report, TaskHive creating')
+        self.type = self.config[self.module.query_module][sub_task].get('type', 'hive')
+        print(f'type: {self.type}')
+        
+        if self.type == 'hive':
+            report = TaskHive(config, root_path, param_dt, module, sub_task
+                          , self.task_queue, self.lock, self.semaphore)
+        elif self.type == 'spark':
+            report = TaskSpark(config, root_path, param_dt, module, sub_task
+                          ,self.semaphore)
+
+        report.run_querys()
+
+
+    # def run_tasks(self):
+
+    #     # condition: hive on spark
+    #     for i in range(len(self.tasks)):
+    #         print('run tasks')
+    #         try:
+    #             print(f'running task: {i}')
+    #             self.tasks[i].run_querys()
+    #             print('-----------------------------------')
+    #             print('-----------------------------------')
+    #             print('-----------------------------------')
+    #             print('-----------------------------------')
+    #             print('-----------------------------------')
+    #             print('-----------------------------------')
+    #         except Exception as e:
+    #             print(f'run task failed. {i}')
+    #             print(e)
+    #     self.connector.close()
+
+    #     # TODO condition: spark on hive
+
+class Task:
+    """
+        abstract class to define interface
+    """
+    def __init__(self):
+        pass
+    
+    @abstractmethod
+    def run_querys(self):
+        pass
+
+class TaskHive(Task):
+    """
+        sub_query level: task
+        factory mode:
+            querymanager to process sql template
+            connector to run query and save dataframes
+    """
+    def __init__(self, config, root_path, param_dt, module, sub_task, task_queue, lock, semaphore):
+        super().__init__()
+        self.config = config
+        self.root_path = root_path
+        self.param_dt = param_dt
+        self.module = module
+
+        # newly added threads params
+        self.task_queue = task_queue
+        self.lock = lock
+        self.semaphore = semaphore
+
 
         self.config['end_dt'] = param_dt['end_dt']
         self.config['start_dt'] = param_dt['start_dt']
@@ -50,11 +152,10 @@ class Task:
         assert self.config is not None, "Config is None"
 
         self.query_manager = QueryManager(self.config, self.root_path, self.param_dt, module, sub_task)
-        self.query_manager.print_query_runs()
+        # self.query_manager.print_query_runs()
         self.quries = self.query_manager.query_runs
 
         # self.connector = HiveConnector(self.config, self.root_path, module)
-        self.connector = connector
         self.template_names = self.query_manager.template_names
         self.tables = self.config[module.query_module][sub_task]["tables"]
         self.tasks_num = int(self.config[module.query_module][sub_task]["tasks_num"])
@@ -67,13 +168,45 @@ class Task:
         self.temp_save_path = self.config[module.query_module][sub_task]["temp_save_path"]
 
     def run_querys(self):
+        logger.debug('TaskHive: run_querys entered.')
+        threads = []
+
         for i in range(self.tasks_num):
+            if self.flags[i] == 0:
+                continue
+            logger.debug('TaskHive: run_querys loop entered.')
+            print(f'running querys: {i}')
+            print(self.quries[self.template_names[i]])
+            thread = threading.Thread(target=self.worker, args=(i,))
+            threads.append(thread)
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+            print('running querys done')
+            print('-----------------------------------')
+            print('-----------------------------------')
+            print('-----------------------------------')
+            print('-----------------------------------')
+            print('-----------------------------------')
+            print('-----------------------------------')
+
+    def worker(self, i):
+        try:
+            from random import randint
+            time.sleep(randint(1,5))
+            connector = HiveConnector(self.config, self.root_path, self.module)
+        except Exception as e:
+            print('init connector failed: ', e)
+        else:
             try:
-                print(f'running querys: {i}')
+                print(f'Hive query started: {i}')
                 print(self.quries[self.template_names[i]])
-                self.connector.query_and_save(self.quries, self.template_names, i, self.tables, self.flags, self.temp_save_path)
-                # print(df)
-                print('running querys done')
+                with self.semaphore:
+                    # random time sleep 1-5s
+                    time.sleep(randint(1,5))
+                    result = connector.query_and_save(self.quries, self.template_names, i, self.tables, self.flags, self.temp_save_path)
+                print('Hive running querys done')
                 print('-----------------------------------')
                 print('-----------------------------------')
                 print('-----------------------------------')
@@ -81,7 +214,172 @@ class Task:
                 print('-----------------------------------')
                 print('-----------------------------------')
             except Exception as e:
-                print(f'Query: {i} run querys failed.')
+                print(f'Hive Query: {i} run querys failed.')
                 print(e)
+            else:
+                print('Hive worker result: {}'.format(result))
+            finally:
+                connector.close()
+                logger.debug('thread worker: close connection from the inside no matter what')
+                # connector.query_result_save()
+                # result = connector.query_and_save()
+            
+
+class TaskSpark(Task):
+    def __init__(self, config, root_path, param_dt, module, sub_task, semaphore):
+        """
+            params initialization:
+                config: dict
+                root_path: str
+                param_dt: dict
+                module: module
+                sub_task: str
+                semaphore: threading
+        """
+        super().__init__()
+        self._set_logger()
+        try:
+            self._gen_args(config, root_path, param_dt, module, sub_task, semaphore)
+            self._gen_task_params()
+        except Exception as e:
+            self.logger.debug(f'Spark Task nitialization failed: ', e)
+            print(traceback.format_exc())
+            self.init_success = 0
+        else:
+            self.init_success = 1
+
+    def _set_logger(self):
+        self.logger = logging.getLogger('Spark_schedular_logger')
+        self.logger.setLevel(logging.DEBUG)
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(formatter)
+        self.logger.addHandler(console_handler)
+
+    def _gen_args(self, config, root_path, param_dt, module, sub_task, semaphore):
+        """
+            generate args for spark
+        """
+        self.config = config
+        self.root_path = root_path
+        self.param_dt = param_dt
+        self.module = module
+        self.semaphore = semaphore
+        # self.config['end_dt'] = param_dt['end_dt']
+        # self.config['start_dt'] = param_dt['start_dt']
+        self.end_dt = param_dt['end_dt']
+        self.start_dt = param_dt['start_dt']
+        self.tables = self.config[module.query_module][sub_task]["tables"]
+
+        # self.flags = []
+        # for i, table in tables:
+        #     self.flags
+
+    def _gen_task_params(self):
+        self.public_task_params = {}
+        self.public_task_params.update({'end_dt': self.end_dt})
+        self.public_task_params.update({'start_dt': self.start_dt})
+
+
+    def _get_save_file(self, temp_save_path, file):
+        return os.path.join(self.root_path, temp_save_path, self.end_dt, file)
+    
+    def _get_base_dir(self, temp_save_path):
+        return os.path.join(self.root_path, temp_save_path, self.end_dt)
+
+
+    def run_querys(self):
+        """
+            control flow: multithreading 
+            For loop in len(tasks_num)
+        """
+        threads = []
+        for i, table in enumerate(self.tables):
+            try:
+                # entire spark tasks init failed, break all
+                if self.init_success == 0: 
+                    break  # 
+                
+                # type check
+                flag = table[0]
+                temp_save_path = table[1]
+                mod = table[2]
+                obj = table[3]
+                save_file = table[4]
+                
+                file = self._get_save_file(temp_save_path, save_file)
+                base_dir = self._get_base_dir(temp_save_path)
+                # 初始化参数
+                params = {}
+                params.update(self.public_task_params)
+                params.update({'others': table[5:]})
+                params.update({'save_file': file})
+                params.update({'base_dir': base_dir})
+                self.logger.debug(f'Spark task params: {params}')
+
+            except Exception as e:
+                self.logger.debug('A Spark task type check failed: ', e)
+                print(traceback.format_exc())
+            else:
+                if flag == 1:
+                    # create thread
+                    # start thread
+                    thread = threading.Thread(target=self.worker, args=(i, mod, obj, params))
+                    threads.append(thread)
+                    self.logger.debug(f'thread {thread} added to threads {threads}')
+                    thread.start()
+                    self.logger.debug(f'thread {thread} started')
+
+                
+        
+        for thread in threads:
+            thread.join()
+
+    def worker(self, i, mod, obj, params):
+        """
+            initialize the spark session
+            create customized
+            
+        """
+        try:
+            from random import randint
+            time.sleep(randint(1,3))
+            # create spec task obj
+            task_obj = self._create_instance(mod, obj)(params) # ? TODO 参数传入
+        except Exception as e:
+            self.logger.debug(f'Spark Task Worker create instance failed: ', e)
+        else:
+            try:
+                # call general query function
+                print(f'Spark query started: {i}')
+                with self.semaphore:
+                    time.sleep(randint(1,3))
+                    task_obj.query_and_save()
+                    print(traceback.format_exc())
+                print('Spark running querys done')
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+                print('-----------------------------------')
+            except Exception as e:
+                print(f'Spark Query: {i} run querys failed.')
+                print(e)
+            else:
+                print('Spark Task Worker Job finished')
+            
+        
+
+    def _create_instance(self, mod, obj):
+        """_summary_
+            return the instance of the Customized class
+        """
+        import importlib
+        module = importlib.import_module(mod)
+        Class = getattr(module, obj)
+        print('successfully import transform class.')
+        return Class
 
         
