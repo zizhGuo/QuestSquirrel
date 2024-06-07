@@ -82,18 +82,18 @@ class HiveConnector:
                                    password=self.password
                                    )
 
-    @retry(max_retries=3, retry_delay=10, exception_to_check=Exception)
-    def query_results(self, query, connection):
-        with managed_cursor(connection) as cursor:
-            cursor.execute(query)
-            results = cursor.fetchall()
-            columns=[desc[0] for desc in cursor.description]
-            print('results: {}'.format(results))
-            df = pd.DataFrame(results, columns=columns)
-            if df.empty: # TODO 错误或者正常无结果都可能empty
-                print('Empty dataframe.')
-                raise Exception('No result set to fetch from. from dataframe')
-            return df
+    # @retry(max_retries=3, retry_delay=10, exception_to_check=Exception)
+    # def query_results(self, query, connection):
+    #     with managed_cursor(connection) as cursor:
+    #         cursor.execute(query, async_=True)
+    #         results = cursor.fetchall()
+    #         columns=[desc[0] for desc in cursor.description]
+    #         print('results: {}'.format(results))
+    #         df = pd.DataFrame(results, columns=columns)
+    #         if df.empty: # TODO 错误或者正常无结果都可能empty
+    #             print('Empty dataframe.')
+    #             raise Exception('No result set to fetch from. from dataframe')
+    #         return df
 
     @retry(max_retries=3, retry_delay=10, exception_to_check=Exception)
     def query_results_log(self, query, connection):
@@ -123,11 +123,26 @@ class HiveConnector:
             return df
 
     @retry(max_retries=3, retry_delay=10, exception_to_check=Exception)
+    def query_results(self, query, connection):
+        with managed_cursor(connection) as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            columns=[desc[0] for desc in cursor.description]
+            cursor.close()
+
+            # print('results: {}'.format(results))
+            df = pd.DataFrame(results, columns=columns)
+            if df.empty:
+                print('Empty dataframe.')
+                raise Exception('No result set to fetch from. from dataframe')
+            return df
+
+    @retry(max_retries=3, retry_delay=10, exception_to_check=Exception)
     def just_query(self, query, connection):
         with managed_cursor(connection) as cursor:
             cursor.execute(query)
 
-    def query_and_save(self, queries, template_names, i, tables, flags, temp_save_path):
+    def query_and_save(self, queries, template_names, i, tables, flags, temp_save_path, DBUG_LOGS):
         print('enter query_and_save')
         query = queries[template_names[i]]
         table_name = tables[i]
@@ -142,7 +157,10 @@ class HiveConnector:
                 time_start = time.time()
                 # df = self.query_results(query)
                 with managed_connection(self.conn) as connection:
-                    df = self.query_results_log(query, connection)
+                    if DBUG_LOGS == 1:
+                        df = self.query_results_log(query, connection)
+                    else:
+                        df = self.query_results(query, connection)
                 time_end = time.time()
                 print('results in df: {}'.format(df))
                 print(f'Time Spent: {time_end - time_start}s')
@@ -170,11 +188,11 @@ class HiveConnector:
             return 'failed'
         else:
             return 'successful'
-        finally:
+        # finally:
             # check if self.conn is closed or not
-            if not self.conn.closed:
-                self.conn.close()
-                logger.debug('query_and_save: self.conn not close, so close finally close it')
+            # if not self.conn.closed:
+                # self.conn.close()
+                # logger.debug('query_and_save: self.conn not close, so close finally close it')
         
     def query_result_save(self):
         print('enter query_and_save')
