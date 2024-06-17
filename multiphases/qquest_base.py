@@ -297,6 +297,42 @@ class QuestTaskBase:
             self._stop_spark()
             self.logger.debug(f'{self.__class__.__name__} done.')
 
+    def query_and_process_v2(self, query, process, *args, **kwargs):
+        """
+        处理流程v2
+        适配pyspark单机环境下load parquet文件
+        与v1区别: 取消调用spark stop, 维持temp view
+        :param query: query方法
+        :param process: process方法
+        """
+        try:
+            result = query(*args, **kwargs)
+        except Exception as e:
+            self.logger.debug('query failed')
+            print(e)
+            return 'failed'
+        else:
+            self.logger.debug('query success, start processing')
+            try:
+                df = process(result, *args, **kwargs)
+            except Exception as e:
+                self.logger.debug(f'process failed, class name: {self.__class__.__name__}')
+                print(e)
+                return 'failed'
+            else:
+                self.logger.debug('process success, start saving')
+                try:
+                    self.save_data(df)
+                except Exception as e:
+                    self.logger.debug('save failed')
+                    print(e)
+                    return 'failed'
+        finally:
+            # self.logger.debug(f'query_and_process_v1: finally check _spark: {self._spark}')
+            # self.logger.debug(f'query_and_process_v1: finally sc._jsc.sc().isStopped(): {self.spark.sparkContext._jsc.sc().isStopped()}')
+            # self._stop_spark()
+            self.logger.debug(f'{self.__class__.__name__} done.')
+
     def query_and_save(self):
         """
             入口方法
