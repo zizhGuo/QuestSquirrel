@@ -255,7 +255,7 @@ class TaskSpark(Task):
         """
         super().__init__()
         self._set_logger()
-        self.num_processes = 4
+        self.num_processes = 1
         self.stage_config = _sub_config
         try:
             self._gen_args(config, root_path, param_dt, module, sub_task)
