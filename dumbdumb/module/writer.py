@@ -69,7 +69,12 @@ class ParquetWriter:
                 shutil.rmtree(path)
 
     @staticmethod
+    def convert_columns_to_lowercase(columns):
+        return [col.lower() for col in columns]
+
+    @staticmethod
     def _data2table(data, columns, add_columns=None):
+        columns = ParquetWriter.convert_columns_to_lowercase(columns)
         arrays = [pa.array([row[i] for row in data]) for i in range(len(columns))]
         batch = pa.RecordBatch.from_arrays(arrays, names=columns)
         table = pa.Table.from_batches([batch])
@@ -80,14 +85,7 @@ class ParquetWriter:
         return table
 
     def _data2table_ch(data, columns, types):
-        """
-        将数据保存为PyArrow Table格式
-        """
-        # Sub-method to convert column names to lowercase
-        def convert_columns_to_lowercase(columns):
-            return [col.lower() for col in columns]
-        
-        columns = convert_columns_to_lowercase(columns)
+        columns = ParquetWriter.convert_columns_to_lowercase(columns)
         schema = pa.schema([(col, pyarrow_types[types[i]]) for i, col in enumerate(columns)])
         
         arrays = []
@@ -126,13 +124,14 @@ class ParquetWriter:
                                                   config.get('output_dir')
                 )
             else:
+                partition_arg = [config.get('partition_cols')] if config.get('partition_cols') else []
                 ParquetWriter.pipeline_batch_produce(config.get('host'), 
                                                      config.get('user'), 
                                                      config.get('password'), 
                                                      config.get('database'), 
                                                      config.get('sql'), 
                                                      config.get('batch_size'), 
-                                                     [config.get('partition_cols')], 
+                                                     partition_arg, 
                                                      config.get('add_columns'), 
                                                      config.get('output_dir')
             )

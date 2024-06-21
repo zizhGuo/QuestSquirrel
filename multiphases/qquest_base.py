@@ -226,10 +226,12 @@ class QuestTaskBase:
         template_file = self.args['template']+'.sql'
         if self.args.get('template_type') and self.args['template_type'] == 'stable':
             template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,req_status,template_file)
-        elif self.args['template_type'] == 'test_batch':
+        elif self.args.get('template_type') and self.args['template_type'] == 'test_batch':
             template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,'test_batch',template_file)
-        else:
+        elif self.args.get('template_type') and self.args['template_type'] == 'test':
             template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,'test',template_file)
+        else:
+            template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,req_status, template_file)
         
         try:
             self.logger.debug(f'try load query: {template_file}')
