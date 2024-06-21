@@ -98,7 +98,7 @@ class TaskScheduler:
             .getOrCreate()
         spark.sql("show tables;").show()
 
-        files = get_subdirectories('/data/test_db/')
+        files = get_subdirectories('/data/avid/')
         print(files)
         tb2dict = {x.split("/")[-1]:x  for x in files}
         for k, v in tb2dict.items():
@@ -391,7 +391,8 @@ class TaskSpark(Task):
                 self.logger.debug('A Spark task type check failed: ', e)
                 print(traceback.format_exc())
             else:
-                jobs.append((i, mod, obj, params))
+                if flag:
+                    jobs.append((i, mod, obj, params))
         try:
             with multiprocessing.Pool(processes=self.num_processes) as pool:
                 results = [pool.apply_async(self.worker_multiprocessing, args=(i, mod, obj, params)) for i, mod, obj, params in jobs]
