@@ -38,3 +38,11 @@ configs_old/
 data/
 modules_fairyland/copy/
 
+cmd/*
+
+*.yaml
+
+dumbdumb/cmd
+dumbdumb/script
+
+QuestSquirrel.code-workspace
