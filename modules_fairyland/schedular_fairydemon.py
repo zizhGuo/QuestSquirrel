@@ -95,7 +95,10 @@ class TaskScheduler:
         spark = SparkSession.builder \
             .appName("Local SparkSession") \
             .master("local[*]") \
+            .config("spark.driver.memory", "8g") \
+            .config("spark.executor.memory", "8g") \
             .getOrCreate()
+        spark.conf.set("spark.sql.session.timeZone", "UTC")
         spark.sql("show tables;").show()
 
         files = get_subdirectories('/data/avid/')

@@ -255,6 +255,16 @@ class QuestTaskBase:
         result.show()
         return result.toPandas()
 
+    @retry(max_retries=3, retry_delay=5, exception_to_check=Exception)
+    def query_v2(self, *args, **kwargs):
+        """
+        返回spark dataframe
+        """
+        self.logger.debug(f'started query_v1')
+        result = self.spark.sql(self.sql)
+        result.show()
+        return result
+
     def process_v1(self, result, *args, **kwargs):
         """
         默认transform流程v1
@@ -334,6 +344,39 @@ class QuestTaskBase:
             # self.logger.debug(f'query_and_process_v1: finally sc._jsc.sc().isStopped(): {self.spark.sparkContext._jsc.sc().isStopped()}')
             # self._stop_spark()
             self.logger.debug(f'{self.__class__.__name__} done.')
+
+    def query_and_update(self, query, update, *args, **kwargs):
+        """
+        处理流程 update
+        适配pyspark单机环境下load parquet文件
+        与v2区别: 作为update中间表环节, 不保存结果为xlsx, 保存为parquet
+        :param query: query方法
+        :param process: process方法
+        """
+        try:
+            print(f"update: {self.args['update']}")
+        except Exception as e:
+            print(e)
+
+        try:
+            result = query(*args, **kwargs)
+        except Exception as e:
+            self.logger.debug('query failed')
+            print(e)
+            return 'failed'
+        else:
+            self.logger.debug('query success, start updating file to db')
+            try:
+                update(result, *args, **kwargs)
+            except Exception as e:
+                self.logger.debug(f'updating failed, class name: {self.__class__.__name__}')
+                print(e)
+                return 'failed'
+            else:
+                self.logger.debug('updating success, start saving')
+        finally:
+            self.logger.debug(f'{self.__class__.__name__} done.')
+            return 'success'
 
     def query_and_save(self):
         """

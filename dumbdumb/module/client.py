@@ -76,6 +76,7 @@ class Client:
     def _create_sparkcontext(name):
         try:
             spark = SparkSession.builder.appName(name).getOrCreate()
+            spark.conf.set("spark.sql.session.timeZone", "UTC")
         except Exception as e:
             print(f'create sparksession and sparkcontext failed: {e}')
             return None
@@ -187,23 +188,40 @@ class MySQLClient(Client):
     @staticmethod
     @contextlib.contextmanager
     @retry(max_retries=3, retry_delay=5, type='MySQLClient Connect...', exception_to_check=Exception)
-    def mysql_client(host, user, password, database):
+    def mysql_client(host, user, password, database, cursorclass=None):
         connection = None
         try:
             if database != 'na':
-                connection = pymysql.connect(
-                    host=host,
-                    user=user,
-                    password=password,
-                    database=database
-                )
-            else:
-                print(f'database: {database}')
-                connection = pymysql.connect(
+                if not cursorclass:
+                    connection = pymysql.connect(
                         host=host,
                         user=user,
-                        password=password   
-                )
+                        password=password,
+                        database=database
+                    )
+                else:
+                    connection = pymysql.connect(
+                        host=host,
+                        user=user,
+                        password=password,
+                        database=database,
+                        cursorclass=cursorclass
+                    )
+            else:
+                print(f'database: {database}')
+                if not cursorclass:
+                    connection = pymysql.connect(
+                            host=host,
+                            user=user,
+                            password=password
+                    )
+                else:
+                    connection = pymysql.connect(
+                            host=host,
+                            user=user,
+                            password=password,
+                            cursorclass=cursorclass
+                    )
             yield connection
         except Exception as e:
             print('Failed to connect to MySQL, error:', e)
@@ -232,7 +250,31 @@ class MySQLClient(Client):
         except Exception as e:
             print(f'execute sql failed, error: {e}')
             return None, None
-    
+     
+    # 接单   
+    # @staticmethod
+    # @retry(max_retries=3, retry_delay=5, type='MySQLClient Executing Query.....', exception_to_check=Exception)
+    # def execute_batch(host, user, password, db, sql, batch_size):
+    #     """
+    #     执行查询成功, 创建_result存储结果并返回;
+    #     否则, 返回None
+    #     """
+    #     try:
+    #         with MySQLClient.mysql_client(host, user, password, db) as connection: 
+    #             print('Connection....initializing....')
+    #             with connection.cursor() as cursor:
+    #                 cursor.execute(sql)
+    #                 columns = [desc[0] for desc in cursor.description]
+    #                 while True:
+    #                     rows = cursor.fetchmany(batch_size)
+    #                     if not rows:
+    #                         break
+    #                     print('fetching batches from db......')
+    #                     yield rows, columns
+    #     except Exception as e:
+    #         print(f'execute sql failed, error: {e}')
+    #         return None, None
+        
     @staticmethod
     @retry(max_retries=3, retry_delay=5, type='MySQLClient Executing Query.....', exception_to_check=Exception)
     def execute_batch(host, user, password, db, sql, batch_size):
@@ -241,7 +283,7 @@ class MySQLClient(Client):
         否则, 返回None
         """
         try:
-            with MySQLClient.mysql_client(host, user, password, db) as connection: 
+            with MySQLClient.mysql_client(host, user, password, db, cursorclass=pymysql.cursors.SSCursor) as connection: 
                 print('Connection....initializing....')
                 with connection.cursor() as cursor:
                     cursor.execute(sql)
