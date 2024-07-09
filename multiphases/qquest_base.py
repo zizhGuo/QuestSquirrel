@@ -3,7 +3,7 @@
 
 流程分为1. query 2. process 3. save
 
-作者：gzz
+作者：郭子谆
 
 更新日期: 20240604
 """
@@ -56,10 +56,39 @@ class QuestTaskBase:
         self.params = params
         if 'PARAMS' in kwargs:
             PARAMS.update(kwargs['PARAMS'])
+        # print(f'PARAMS: {PARAMS}')
         self._set_args()
         self._create_logger()
         self._set_default_sql()
+        # self.args = {
+        #     'app_name': 'QuestTaskBase',
+        #     'logger_name': 'QuestTaskBase_logger',
+        #     'start_dt': params['start_dt'],
+        #     'end_dt': params['end_dt'],
+        #     'save_file': params['save_file'],
+        #     'template': params['template'],
+        #     'base_dir': params['base_dir'],
+        #     'others': params['others'],
+        #     'root_path': params['root_path']
+        # }
+        # self._set_logger() # deprecated
 
+        # 默认会载入template中的sql
+        # if len(params['others']) == 2:
+        #     if isinstance(params['others'][1], dict) and isinstance(params['others'][0], dict):
+        #         self.sql = self._load_query()
+        #         print('______sql________')
+        #         print('_________________')
+        #         print(self.sql)
+        #         print('_________________')
+        #         print('______end________')
+        
+        # if len(params['others']) > 2:
+        #     if isinstance(params['others'][1], dict) and isinstance(params['others'][0], dict):
+        #         self.sql = self._load_query()
+        #     self._set_extra_args()
+
+        # self._get_spark() # deprecated
         print('QuestTaskBase init done')
     
     @staticmethod
@@ -151,6 +180,29 @@ class QuestTaskBase:
         console_handler.setFormatter(formatter)
         self._logger.addHandler(console_handler)
         return self._logger
+    
+    # def _get_spark(self):
+    #     """
+    #         deprecated
+    #         获取spark session
+    #     """
+    #     try:
+    #         self.logger.debug('_get_spark entered')
+    #         self.logger.debug('try to get spark')
+    #         self.spark = SparkSession.builder \
+    #             .config("spark.executor.instances", "2") \
+    #             .config("spark.executor.cores", "2") \
+    #             .appName(self.args['app_name']) \
+    #             .enableHiveSupport() \
+    #             .getOrCreate()
+    #     except Exception as e:
+    #         self.logger.debug('get spark failed')
+    #         print(e)
+    #         print(traceback.format_exc())
+    #     else:
+    #         self.logger.debug('_get spark successfull')
+    #     finally:
+    #         self.logger.debug('_get_spark done')
 
     def _stop_spark(self):
         """
@@ -226,12 +278,10 @@ class QuestTaskBase:
         template_file = self.args['template']+'.sql'
         if self.args.get('template_type') and self.args['template_type'] == 'stable':
             template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,req_status,template_file)
-        elif self.args.get('template_type') and self.args['template_type'] == 'test_batch':
+        elif self.args['template_type'] == 'test_batch':
             template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,'test_batch',template_file)
-        elif self.args.get('template_type') and self.args['template_type'] == 'test':
-            template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,'test',template_file)
         else:
-            template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,req_status, template_file)
+            template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,'test',template_file)
         
         try:
             self.logger.debug(f'try load query: {template_file}')
@@ -254,16 +304,6 @@ class QuestTaskBase:
         result = self.spark.sql(self.sql)
         result.show()
         return result.toPandas()
-
-    @retry(max_retries=3, retry_delay=5, exception_to_check=Exception)
-    def query_v2(self, *args, **kwargs):
-        """
-        返回spark dataframe
-        """
-        self.logger.debug(f'started query_v1')
-        result = self.spark.sql(self.sql)
-        result.show()
-        return result
 
     def process_v1(self, result, *args, **kwargs):
         """
@@ -308,75 +348,6 @@ class QuestTaskBase:
             # self.logger.debug(f'query_and_process_v1: finally sc._jsc.sc().isStopped(): {self.spark.sparkContext._jsc.sc().isStopped()}')
             self._stop_spark()
             self.logger.debug(f'{self.__class__.__name__} done.')
-
-    def query_and_process_v2(self, query, process, *args, **kwargs):
-        """
-        处理流程v2
-        适配pyspark单机环境下load parquet文件
-        与v1区别: 取消调用spark stop, 维持temp view
-        :param query: query方法
-        :param process: process方法
-        """
-        try:
-            result = query(*args, **kwargs)
-        except Exception as e:
-            self.logger.debug('query failed')
-            print(e)
-            return 'failed'
-        else:
-            self.logger.debug('query success, start processing')
-            try:
-                df = process(result, *args, **kwargs)
-            except Exception as e:
-                self.logger.debug(f'process failed, class name: {self.__class__.__name__}')
-                print(e)
-                return 'failed'
-            else:
-                self.logger.debug('process success, start saving')
-                try:
-                    self.save_data(df)
-                except Exception as e:
-                    self.logger.debug('save failed')
-                    print(e)
-                    return 'failed'
-        finally:
-            # self.logger.debug(f'query_and_process_v1: finally check _spark: {self._spark}')
-            # self.logger.debug(f'query_and_process_v1: finally sc._jsc.sc().isStopped(): {self.spark.sparkContext._jsc.sc().isStopped()}')
-            # self._stop_spark()
-            self.logger.debug(f'{self.__class__.__name__} done.')
-
-    def query_and_update(self, query, update, *args, **kwargs):
-        """
-        处理流程 update
-        适配pyspark单机环境下load parquet文件
-        与v2区别: 作为update中间表环节, 不保存结果为xlsx, 保存为parquet
-        :param query: query方法
-        :param process: process方法
-        """
-        try:
-            print(f"update: {self.args['update']}")
-        except Exception as e:
-            print(e)
-
-        try:
-            result = query(*args, **kwargs)
-        except Exception as e:
-            self.logger.debug('query failed')
-            print(e)
-            return 'failed'
-        else:
-            self.logger.debug('query success, start updating file to db')
-            try:
-                update(result, *args, **kwargs)
-            except Exception as e:
-                self.logger.debug(f'updating failed, class name: {self.__class__.__name__}')
-                print(e)
-                return 'failed'
-            else:
-                self.logger.debug('updating success, start saving')
-        finally:
-            self.logger.debug(f'{self.__class__.__name__} done.')
-            return 'success'
 
     def query_and_save(self):
         """

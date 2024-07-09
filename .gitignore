@@ -38,3 +38,16 @@ configs_old/
 data/
 modules_fairyland/copy/
 
+*.yaml
+
+cmd/*
+dumbdumb
+
+# special root files
+QuestSquirrel.code-workspace
+run_main.py
+run_update.py
+set_path.sh
+test_apschedular.py
+test_apscheduler_stable.py
+tool_file_copy.py
