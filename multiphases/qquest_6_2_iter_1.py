@@ -17,7 +17,7 @@ from modules_fairyland.decorators import retry
 class EnvirChurnFisheryActivePacific:
     def __init__(self, params): # TODO params
         self.args = {
-            'app_name': 'TranslateSQLtoPySpark',
+            'app_name': 'Quest_6_2_EnvirChurnFisheryActivePacific',
             'start_dt': params['start_dt'],
             'end_dt': params['end_dt'],
             'save_file': params['save_file'],
@@ -39,7 +39,12 @@ class EnvirChurnFisheryActivePacific:
         self.logger.addHandler(console_handler)
     
     def _get_spark(self):
+            # .config("spark.executor.instances", "2") \
+            # .config("spark.executor.cores", "2") \
+            # .config("spark.yarn.am.priority", "1") \
+        
         self.spark = SparkSession.builder \
+            .config("spark.yarn.am.priority", "2") \
             .appName(self.args['app_name']) \
             .enableHiveSupport() \
             .getOrCreate()
@@ -47,6 +52,8 @@ class EnvirChurnFisheryActivePacific:
     def get_config(self):
         config_query = "SELECT gameid, fishery_name, no FROM guozizhun.config_fishery_3d WHERE fisheryname = 'pacific'"
         config_df = self.spark.sql(config_query)
+        self.logger.debug('GET config query done.')
+        config_df.show()
         return config_df
 
     # TODO add retry
@@ -111,6 +118,7 @@ class EnvirChurnFisheryActivePacific:
 
     @retry(max_retries=3, retry_delay=5, exception_to_check=Exception)
     def query_v1(self):
+        self.logger.debug(f'started query_v1')
         config_df = self.get_config()
         A_df = self.get_cte_data()
         aggregations = self.create_aggregations(config_df)
@@ -152,3 +160,6 @@ class EnvirChurnFisheryActivePacific:
         else:
             # create
             self.save_data(result)
+        finally:
+            self.spark.stop()
+            print('EnvirChurnFisheryActivePacific done.')

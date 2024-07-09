@@ -3,15 +3,13 @@ import sys
 print(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'multiphases')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'multiphases')))
 
-# from modules_fairyland.connector import HiveConnector
+from modules_fairyland.connector import HiveConnector
 from modules_fairyland.query import QueryManager
 from modules_fairyland.processor import DataProcessor
 from modules_fairyland.visualizer import Visualizer
 from modules_fairyland.report import ReportGenerator
 from modules_fairyland.email import Email
 from modules_fairyland.flag import Flag
-
-from pyspark.sql import SparkSession
 
 import time
 
@@ -53,21 +51,6 @@ MAX_CONCURRENT_TASKS = 5
     
 """
 
-def get_subdirectories(directory):
-    """
-    Return a list of subdirectory names in the given directory.
-
-    :param directory: The path to the directory
-    :return: A list of subdirectory names
-    """
-    try:
-        subdirectories = [os.path.join(directory,name) for name in os.listdir(directory) if os.path.isdir(os.path.join(directory, name))]
-        return subdirectories
-    except FileNotFoundError:
-        return f"Directory '{directory}' not found."
-    except PermissionError:
-        return f"Permission denied for directory '{directory}'."
-
 class TaskScheduler:
     def __init__(self, config, root_path, param_dt, module) -> None:
         # self.tasks = []
@@ -79,42 +62,10 @@ class TaskScheduler:
 
         self.DBUG_LOGS = config.get('DEBUG_LOGS', 0)
 
-        self.init_spark_local()
-
         # TODO init lock, semaphore
         self.semaphore = threading.Semaphore(MAX_CONCURRENT_TASKS)
         self.task_queue = SimpleQueue()
         self.lock = threading.Lock()
-
-    def init_spark_local(self):
-        import os
-        os.environ['JAVA_HOME'] = '/root/jdk1.8.0_202' 
-        os.environ['PATH'] = os.environ['JAVA_HOME'] + '/bin:' + os.environ['PATH']
-        os.environ['SPARK_LOCAL_IP'] = '127.0.0.1'
-
-        spark = SparkSession.builder \
-            .appName("Local SparkSession") \
-            .master("local[*]") \
-            .config("spark.driver.memory", "8g") \
-            .config("spark.executor.memory", "8g") \
-            .getOrCreate()
-        spark.conf.set("spark.sql.session.timeZone", "UTC")
-        spark.sql("show tables;").show()
-
-        files = get_subdirectories('/data/avid/')
-        print(files)
-        tb2dict = {x.split("/")[-1]:x  for x in files}
-        for k, v in tb2dict.items():
-            df = spark.read.parquet(v)
-            df.createOrReplaceTempView(k)
-        spark.sql("show tables;").show()
-
-    def spark_get_stop(self):
-        spark = SparkSession.builder \
-            .appName("Local SparkSession") \
-            .master("local[*]") \
-            .getOrCreate().stop()
-        logger_scheduler.debug(f'spark get and stop: {spark}')
 
     def run_tasks(self):
         threads = []
@@ -162,7 +113,6 @@ class TaskScheduler:
         
         end = time.time()
         print('spent time: ', end-start)
-        self.spark_get_stop()
 
     def execute_report(self, config, root_path, param_dt, module, sub_task, _sub_config):
         logger_scheduler.debug('execute_report, TaskHive creating')
@@ -305,7 +255,7 @@ class TaskSpark(Task):
         """
         super().__init__()
         self._set_logger()
-        self.num_processes = 1
+        self.num_processes = 4
         self.stage_config = _sub_config
         try:
             self._gen_args(config, root_path, param_dt, module, sub_task)
@@ -394,8 +344,7 @@ class TaskSpark(Task):
                 self.logger.debug('A Spark task type check failed: ', e)
                 print(traceback.format_exc())
             else:
-                if flag:
-                    jobs.append((i, mod, obj, params))
+                jobs.append((i, mod, obj, params))
         try:
             with multiprocessing.Pool(processes=self.num_processes) as pool:
                 results = [pool.apply_async(self.worker_multiprocessing, args=(i, mod, obj, params)) for i, mod, obj, params in jobs]

@@ -4,9 +4,8 @@ connector:
   hive_conf:
     "hive.resultset.use.unique.column.names": "false"
     "hive.execution.engine": "spark"
-    "spark.executor.instances": "6"
-    "spark.executor.cores": "8"
-    "spark.driver.cores": "8"
+    "spark.executor.instances": "2"
+    "spark.executor.cores": "2"
   username: "hadoop"
   password: "hadoop"
   auth: "CUSTOM"
@@ -35,12 +34,36 @@ query:
     temp_save_path: "data/quest_fairydemon"
     tasks_num: 1
     template_names: ['lv1_user_list_push']
-    table_format: ['xlsx']
+    flags: [1]
     tables: ['na']
     info:
       req_cat: "request_5_1"
       req_iter: "iter_2"
-      req_status: "test"
+      req_status: "stable"
+    params:
+      NA: "NA"
+  task3:
+    temp_save_path: "data/quest_fairydemon"
+    tasks_num: 1
+    template_names: ['dwd_level_spirit_pet_facts_push']
+    flags: [1]
+    tables: ['na']
+    info:
+      req_cat: "request_5_2"
+      req_iter: "iter_1"
+      req_status: "stable"
+    params:
+      NA: "NA"
+  task1:
+    temp_save_path: "data/quest_pacific"
+    tasks_num: 1
+    template_names: ['lv1_user_list_push']
+    flags: [1]
+    tables: ['na']
+    info:
+      req_cat: "request_6_1"
+      req_iter: "iter_1"
+      req_status: "stable"
     params:
       NA: "NA"
 
