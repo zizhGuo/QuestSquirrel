@@ -15,6 +15,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import shutil
 
+import gc
+
 import multiprocessing as mp
 
 from client import ClickhouseClient, MySQLClient
@@ -194,6 +196,8 @@ class ParquetWriter:
                         _file = file + f'_{str(idx)}' + ".parquet"
                         print(f'all params: table={table}, partition_cols={partition_cols}, output_dir={output_dir}, _file={_file}')
                         ParquetWriter.write_parquet(table, partition_cols, output_dir, _file, current_i)
+                        del data_dict[idx]
+                        gc.collect()
                         unused_queue.put(idx)
                     else:
                         time.sleep(0.1) 
