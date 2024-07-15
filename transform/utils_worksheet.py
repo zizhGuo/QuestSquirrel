@@ -17,6 +17,8 @@ THICK_BORDER = Border(
     bottom=Side(style='thin')
 )
 
+CENTER_ALIGNMENT = Alignment(horizontal='center', vertical='center')
+
 def df2ws(func):
     """模块装饰器: df转ws装饰器, 用于将df转换为ws并写入ws中
         标准化：粗体标题，边框
@@ -24,17 +26,24 @@ def df2ws(func):
     """
     @functools.wraps(func)
     def wrapper(self, ws, df, start_row, *args, **kwargs):
-        current_row = start_row 
+        
+        current_row = start_row
+        num_of_cols = df.shape[1]
+
         for _, r in enumerate(dataframe_to_rows(df, index=False, header=True)):
             ws.append(r)
             if current_row == start_row:
-                for cell in ws[current_row]:
+                for col in range(1, num_of_cols + 1):
+                    cell = ws.cell(row=current_row, column=col)
                     cell.font = Font(bold=True)
                     cell.border = THICK_BORDER
+                    cell.alignment = CENTER_ALIGNMENT
             if 'regular' in kwargs:
                 if current_row != start_row:
-                    for cell in ws[current_row]:
+                    for col in range(1, num_of_cols + 1):
+                        cell = ws.cell(row=current_row, column=col)
                         cell.border = THICK_BORDER
+                        cell.alignment = CENTER_ALIGNMENT
             current_row += 1
         ws.append([])
 
