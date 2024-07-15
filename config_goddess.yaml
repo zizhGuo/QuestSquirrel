@@ -4,9 +4,8 @@ connector:
   hive_conf:
     "hive.resultset.use.unique.column.names": "false"
     "hive.execution.engine": "spark"
-    "spark.executor.instances": "6"
-    "spark.executor.cores": "8"
-    "spark.driver.cores": "8"
+    "spark.executor.instances": "2"
+    "spark.executor.cores": "2"
   username: "hadoop"
   password: "hadoop"
   auth: "CUSTOM"
@@ -14,119 +13,109 @@ connector:
 test:
   launch: 0
   params:
-    end_dt: '2024-03-19'
+    end_dt: '2024-04-28'
     gap_days: 8
 
 steps: 
   query: 1
-  report: 0
+  report: 1
   visual: 0
-  email: 0
+  email: 1
 
 module:
   connector_module: 'connector'
-  query_module: 'query_goddess_visual_test'
-  report_module: 'report_goddess_test'
-  visual_module: 'visual_goddess_test'
-  email_module: 'email_goddess_test'
+  query_module: 'query'
+  report_module: 'report'
+  visual_module: 'visual'
+  # email_module: 'email'
+  email_module: 'email_test'
 
-query_goddess_visual_test:
-  task1:
-    temp_save_path: "data/quest_goddess"
-    tasks_num: 3
-    template_names: ['visual_part_1_1', 'visual_part_1_2', 'visual_part_2']
-    tables: ['Quest_2_1_iter2_visual_filtered_order.csv', 'Quest_2_1_iter2_visual_purchase_type.csv', 'query-hive-1002.xlsx']
-    info:
-      req_cat: "request_2_1"
-      req_iter: "iter_4"
-      req_status: "dev"
-    params:
-      vip_range1: '(1, 2, 3, 4, 5)'
-      vip_range2: '(6, 7, 8, 9, 10)'
-      vip_range3: '(11, 12, 13, 14, 15)'
-      vip_price1: 1
-      vip_price2: 6
-      vip_price3: 30
-      vip_tag1: 'V1-V5'
-      vip_tag2: 'V6-V10'
-      vip_tag3: 'V11-V15'
-      start_dt: '20240315'
-      end_dt: '20240323'
-      last_start_dt: '20240126'
-      start_date: '2024-03-15'
-      mon: '202403'
+query:
+  task_spark_update:
+    type: 'spark'
+    template_type: 'stable'
+    tables:
+      # - [1, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'GoddessPush', 'step1_push_overwrite.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'debug': 1, 'rk': 1}]
+      - [1, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'GoddessPush', 'step1_push_overwrite.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'na':'na'}]
+  task_spark:
+    type: 'spark'
+    template_type: 'stable'
+    tables: 
+  #     - [0, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'Task1', 'step2_task_1_1.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'debug': 1, 'l_rk': 15, 'h_rk': 16}]
+  #     - [0, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'Task2', 'step2_task_2.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'debug': 1, 'l_rk': 15, 'h_rk': 16}]
+  #     - [0, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'Task3', 'step2_task_3.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'debug': 1, 'l_rk': 15, 'h_rk': 16}]
+  #     - [0, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'Task4_1', 'step2_task_4_1.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'debug': 1, 'l_rk': 15, 'h_rk': 16}]
+  #     - [0, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'Task4_2', 'step2_task_4_2.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'debug': 1, 'l_rk': 15, 'h_rk': 16}]
+      
+      - [1, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'Task1', 'step2_task_1_1.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'na':'na'}]
+      - [1, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'Task2', 'step2_task_2.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'na':'na'}]
+      - [1, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'Task3', 'step2_task_3.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'na':'na'}]
+      - [1, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'Task4_1', 'step2_task_4_1.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'na':'na'}]
+      - [1, 'data/quest_goddess', 'qquest_goddess_2_1_iter_5', 'Task4_2', 'step2_task_4_2.xlsx', {'req_cat': "request_2_1", 'req_iter': "iter_5", 'req_status': "stable"}, {'na':'na'}]
 
-query_goddess_test:
-  task1:
+report:
+  report_goddess:
+    desc: 'goddess日报1期-report-正式任务'
     temp_save_path: "data/quest_goddess"
-    tasks_num: 6
-    template_names: ['step2_task_1_1', 'step2_task_1_2', 'step2_task_2', 'step2_task_3', 'step2_task_4_1', 'step2_task_4_2']
-    table_format: ['xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx', 'xlsx']
-    tables: ['step2_task_1_1.xlsx', 'step2_task_1_2.xlsx', 'step2_task_2.xlsx', 'step2_task_3.xlsx', 'step2_task_4_1.xlsx', 'step2_task_4_2.xlsx']
-    info:
-      req_cat: "request_2_1"
-      req_iter: "iter_4"
-      req_status: "dev"
-    params:
-      vip_range1: '(1, 2, 3, 4, 5)'
-      vip_range2: '(6, 7, 8, 9, 10)'
-      vip_range3: '(11, 12, 13, 14, 15)'
-      vip_price1: 1
-      vip_price2: 6
-      vip_price3: 30
-      vip_tag1: 'V1-V5'
-      vip_tag2: 'V6-V10'
-      vip_tag3: 'V11-V15'
-      start_dt: '20240315'
-      end_dt: '20240323'
-      last_start_dt: '20240126'
-      start_date: '2024-03-15'
-      mon: '202403'
-
-report_goddess_test:
-  report1:
-    desc: '女神报表恢复-测试-所有数据表-报告生成'
-    temp_save_path: "data/quest_goddess"
-    output_file: 'result_goddess.xlsx'
-    source_tables: ['step2_task_1_1.xlsx', 'step2_task_1_2.xlsx', 'step2_task_2.xlsx', 'step2_task_3.xlsx', 'step2_task_4_1.xlsx', 'step2_task_4_2.xlsx']
-    worksheet: ['ws1', 'ws1', 'ws1', 'ws1', 'ws2', 'ws2']
+    output_file: 'quest_goddess_result.xlsx'
+    source_tables: [
+      'step2_task_1_1.xlsx'
+      ,'step2_task_2.xlsx'
+      ,'step2_task_3.xlsx'
+      ,'step2_task_4_1.xlsx'
+      ,'step2_task_4_2.xlsx'
+    ]
+    worksheet: ['ws1', 'ws1', 'ws1', 'ws2', 'ws2']
     ws2title:
-      ws1: '与上次推送对比'
-      ws2: '7日数据对比材料'
-    column: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6']
+      ws1: '推送人群付费转化统计'
+      ws2: '7日付费人数金额及占比'
+    column: ['colna', 'colna', 'colna', 'colna', 'colna']
+    transform:
+      'step2_task_1_1.xlsx': ['quest_goddess_iter_5', 'Task1']
+      'step2_task_2.xlsx': ['quest_goddess_iter_5', 'Task2']
+      'step2_task_3.xlsx': ['quest_goddess_iter_5', 'Task3']
+      'step2_task_4_1.xlsx': ['quest_goddess_iter_5', 'Task4_1']
+      'step2_task_4_2.xlsx': ['quest_goddess_iter_5', 'Task4_1']
     col2names:
-      col1: ['推送日期', '推送人数', '登录人数', '赐福礼包人数', '礼包金额', '赐福付费率', '2天总付费人数', '2天总付费金额', '付费率', 'ARPU', 'ARPPU']
-      col2: ['推送日期','与上期活动重叠人数（两期均付费）', '与上期活动重叠人数（两期均为未付费）', '与上期活动重叠人数（上期未付费，本期付费）', '与上期活动重叠人数（上期付费，本期未付费）']
-      col3: ['推送日期', '推送人群', '礼包价格', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11', 'V12', 'V13', 'V14', 'V15']
-      col4: ['推送日期', '推送人群', '礼包价格', '推送人数', '登录人数', '赐福礼包人数', '礼包金额', '赐福付费率', '2天总付费人数', '2天总付费金额', '付费率', 'APPU', 'ARPPU']
-      col5: ['日期', '购买礼包人数', '1日付费人数', '人数占比', '2日付费人数', '人数占比', '3日付费人数', '人数占比', '4日付费人数', '人数占比', '5日付费人数', '人数占比', '6日付费人数', '人数占比', '7日付费人数', '人数占比']
-      col6: ['日期', '购买礼包人数', '1日付费金额', '订单占比', '2日付费金额', '订单占比', '3日付费金额', '订单占比', '4日付费金额', '订单占比', '5日付费金额', '订单占比', '6日付费金额', '订单占比', '7日付费金额', '订单占比']
-    style: ['general', 'general', 'general', 'general', 'general', 'general']
-    style_setting:
-      general:
-        header: 
-          font: 'Bold'
-          border: 'Medium'
-          align: 'Center'
-        cell:
-          font: 'Regular'
-          border: 'Thin'
-          align: 'Center'
+      colna: 'na'
 
-visual_goddess_test:
-  vis1:
+visual:
+  ZFT_Fairy:
+    output_file: 'quest_fairydemon_visual.html'
+    temp_save_path: "data/quest_fairydemon"
+    title: '捕鱼炸翻天-仙魔大陆商城图示'
+    visualizer: 
+      - [1, 'vquest_5_1_iter_1', 'FairydemonMall', 'dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
+      - [1, 'vquest_5_2_iter_1', 'VipFisheryDistributionVis', 'dws_envir_fishery_vip.xlsx']
+  ZFT_Fantasy:
+    output_file: 'quest_fantasy_visual.html'
+    temp_save_path: "data/quest_fantasy"
+    title: '捕鱼炸翻天-奇幻海域商城图示'
+    visualizer: 
+      - [1, 'vquest_5_2_iter_1', 'FantasyMall', 'dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
+  YJBY_Pacific:
     output_file: 'result_pacific_visual.html'
-    temp_save_path: "data/quest_goddess"
-    template: 'visual_6_1_1'
-    files: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
+    temp_save_path: "data/quest_pacific"
+    title: '姚记捕鱼-环太平洋商城图示'
+    visualizer: 
+      - [1, 'vquest_6_1_iter_1', 'PacificMall', 'dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
+      - [1, 'vquest_6_2_iter_1', 'VipFisheryDistributionVis', 'dws_envir_fishery_vip.xlsx']
+  YJBY_Doupo:
+    output_file: 'quest_doupo_visual.html'
+    temp_save_path: "data/quest_doupo"
+    title: '捕鱼炸翻天-斗破沧海商城图示'
+    visualizer: 
+      - [1, 'vquest_6_3_iter_1', 'DoupoMall', 'dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
 
-email_goddess_test:
+email_test:
   email1:
-    desc: '女神报表恢复-测试-所有数据表-报告生成'
+    desc: '捕鱼炸翻天数据分析报表-email-测试任务'
     # message: "测试QuestSquirrel"
-    message: "【女神报表恢复-测试-所有数据表-报告生成】"
-    subject: "【女神报表恢复-测试-所有数据表-报告生成】"
-    header_from: "dr.who"
+    message: "
+    附件包含【女神赐福】推送的最新批次和上一批次的数据报表
+    （本邮件为程序自动发送）"
+    subject: "【捕鱼炸翻天女神赐福-测试】"
+    header_from: "dr.guo"
     sender_email: "guozizhun@cxxmobi.com"
     header_to: "guozizhun@cxxmobi.com"
     recipient_show: "[email_test]"
@@ -137,87 +126,31 @@ email_goddess_test:
     to_addrs: "464096202@qq.com, guozizhun@cxxmobi.com"
     # to_addrs: "tulinchao@cxxmobi.com, huangjinjing@cxxmobi.com"
     email_company: "qq"
-    temp_save_path: "data/quest_goddess"
-    read_file: ['result_goddess']
-    read_file_format: ['xlsx']
-    # report_save_path: "data/results"
-    send_file: ['女神报表恢复-测试-所有数据表-报告生成']
-    send_file_format: ['xlsx']
+    attachment_file_read_save: 
+      "data/quest_goddess":
+        - ['quest_goddess_result.xlsx', '女神赐福活动报表.xlsx']
 
-
-query_goddess_push:
-  task1:
-    temp_save_path: "data/quest_goddess"
-    tasks_num: 1
-    template_names: ['step1_push_overwrite_param']
-    table_format: ['xlsx']
-    tables: ['na']
-    info:
-      req_cat: "request_2_1"
-      req_iter: "iter_4"
-      req_status: "dev"
-    params:
-      vip_range1: '(1, 2, 3, 4, 5)'
-      vip_range2: '(6, 7, 8, 9, 10)'
-      vip_range3: '(11, 12, 13, 14, 15)'
-      vip_price1: 1
-      vip_price2: 6
-      vip_price3: 30
-      vip_tag1: 'V1-V5'
-      vip_tag2: 'V6-V10'
-      vip_tag3: 'V11-V15'
-      start_dt: '20240315'
-      end_dt: '20240323'
-      last_start_dt: '20240126'
-      start_date: '2024-03-15'
-      mon: '202403'
-  task2:
-    temp_save_path: "data/quest_goddess"
-    tasks_num: 1
-    template_names: ['step1_push_overwrite_param']
-    table_format: ['xlsx']
-    tables: ['na']
-    info:
-      req_cat: "request_2_1"
-      req_iter: "iter_4"
-      req_status: "dev"
-    params:
-      vip_range1: '(1, 2, 3, 4, 5)'
-      vip_range2: '(6, 7, 8, 9, 10)'
-      vip_range3: '(11, 12, 13, 14, 15)'
-      vip_price1: 1
-      vip_price2: 6
-      vip_price3: 30
-      vip_tag1: 'V1-V5'
-      vip_tag2: 'V6-V10'
-      vip_tag3: 'V11-V15'
-      start_dt: '20240126'
-      end_dt: '20240203'
-      last_start_dt: '20240112'
-      start_date: '2024-01-26'
-      mon: '202401'
-  task3:
-    temp_save_path: "data/quest_goddess"
-    tasks_num: 1
-    template_names: ['step1_push_overwrite_param']
-    table_format: ['xlsx']
-    tables: ['na']
-    info:
-      req_cat: "request_2_1"
-      req_iter: "iter_4"
-      req_status: "dev"
-    params:
-      vip_range1: '(1, 2, 3, 4, 5)'
-      vip_range2: '(6, 7, 8, 9, 10)'
-      vip_range3: '(11, 12, 13, 14, 15)'
-      vip_price1: 1
-      vip_price2: 6
-      vip_price3: 30
-      vip_tag1: 'V1-V5'
-      vip_tag2: 'V6-V10'
-      vip_tag3: 'V11-V15'
-      start_dt: '20240112'
-      end_dt: '20240120'
-      last_start_dt: '20240105'
-      start_date: '2024-01-12'
-      mon: '202401'
+email:
+  email1:
+    desc: '捕鱼炸翻天-email-正式邮件'
+    # message: "测试QuestSquirrel"
+    # message 段落
+    message: "
+    附件包含【女神赐福】推送的最新批次和上一批次的数据报表
+    （本邮件为程序自动发送）"
+    subject: "捕鱼炸翻天女神赐福"
+    header_from: "郭子谆"
+    sender_email: "guozizhun@cxxmobi.com"
+    # header_to: "屠林超, 黄琎晶"
+    header_to: "张晶,顾俊,屠林超,黄琎晶"
+    recipient_show: "zhangjing@cxxmobi.com, gujun@cxxmobi.com, tulinchao@cxxmobi.com, huangjinjing@cxxmobi.com"
+    cc_show: "guozizhun@cxxmobi.com"
+    # cc_show: ""
+    user: "guozizhun@cxxmobi.com"
+    password: "SMBz75e5chpJzsr2"
+    to_addrs: "zhangjing@cxxmobi.com, gujun@cxxmobi.com, tulinchao@cxxmobi.com, huangjinjing@cxxmobi.com"
+    # to_addrs: "tulinchao@cxxmobi.com, huangjinjing@cxxmobi.com"
+    email_company: "qq"
+    attachment_file_read_save: 
+      "data/quest_goddess":
+        - ['quest_goddess_result.xlsx', '女神赐福活动报表.xlsx']
