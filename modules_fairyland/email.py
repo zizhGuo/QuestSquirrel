@@ -330,7 +330,8 @@ class Email:
         # # print(msg.as_string())
 
         # Use SMTP_SSL for secure email sending
-        with SMTP_SSL(host="smtp.exmail.qq.com", port=465) as smtp:
-            smtp.login(user=self.user, password=self.password)
-            smtp.sendmail(from_addr=self.user, to_addrs=all_recipients, msg=msg.as_string())
-            print('Email sent successfully')
+        if self.attachments:
+            with SMTP_SSL(host="smtp.exmail.qq.com", port=465) as smtp:
+                smtp.login(user=self.user, password=self.password)
+                smtp.sendmail(from_addr=self.user, to_addrs=all_recipients, msg=msg.as_string())
+                print('Email sent successfully')

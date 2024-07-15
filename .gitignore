@@ -40,8 +40,13 @@ modules_fairyland/copy/
 
 *.yaml
 
-cmd/*
+cmd
+cmd_nonlocal
 dumbdumb
+draft
+visual
+tool
+compare
 
 # special root files
 QuestSquirrel.code-workspace
@@ -51,3 +56,6 @@ set_path.sh
 test_apschedular.py
 test_apscheduler_stable.py
 tool_file_copy.py
+connector_copy.py
+schedular_fairydemon copy.py
+qquest_draft.py
