@@ -44,5 +44,16 @@ cmd/*
 
 dumbdumb/cmd
 dumbdumb/script
+draft
+visual
+tool
+compare
+cmd_nonlocal
 
 QuestSquirrel.code-workspace
+connector_copy.py
+schedular_fairydemon copy.py
+qquest_goddess_2_1_iter_5.py
+quest_goddess_iter_5.py
+qquest_draft.py
+
