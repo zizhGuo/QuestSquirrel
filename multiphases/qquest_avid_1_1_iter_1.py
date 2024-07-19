@@ -102,6 +102,46 @@ PARAMS = {
         'logger_name': 'Envir2ndNonWaveTriggerVip_logger',
         'column_name': ['日期','未再次触发波动总人数','VIP等级','未再次触发波动人数'],
     }
+    ,'EnvirNonWaveTriggerValueVisual': {
+        'app_name': 'EnvirNonWaveTriggerValueVisual',
+        'logger_name': 'EnvirNonWaveTriggerValueVisual_logger'
+    }
+    ,'EnvirNonWaveTriggerGoldStockVisual': {
+        'app_name': 'EnvirNonWaveTriggerGoldStockVisual',
+        'logger_name': 'EnvirNonWaveTriggerGoldStockVisual_logger'
+    }
+    ,'EnvirNonWaveTriggerCannonVisual': {
+        'app_name': 'EnvirNonWaveTriggerCannonVisual',
+        'logger_name': 'EnvirNonWaveTriggerCannonVisual_logger'
+    }
+    ,'EnvirNonWaveTriggerGamingTimeVisual': {
+        'app_name': 'EnvirNonWaveTriggerGamingTimeVisual',
+        'logger_name': 'EnvirNonWaveTriggerGamingTimeVisual_logger'
+    }
+    ,'Envir2ndNonWaveTriggerValueVisual': {
+        'app_name': 'Envir2ndNonWaveTriggerValueVisual',
+        'logger_name': 'Envir2ndNonWaveTriggerValueVisual_logger'
+    }
+    ,'Envir2ndNonWaveTriggerGoldStockVisual': {
+        'app_name': 'Envir2ndNonWaveTriggerGoldStockVisual',
+        'logger_name': 'Envir2ndNonWaveTriggerGoldStockVisual_logger'
+    }
+    ,'Envir2ndNonWaveTriggerCannonVisual': {
+        'app_name': 'Envir2ndNonWaveTriggerCannonVisual',
+        'logger_name': 'Envir2ndNonWaveTriggerCannonVisual_logger'
+    }
+    ,'Envir2ndNonWaveTriggerGamingTimeVisual': {
+        'app_name': 'Envir2ndNonWaveTriggerGamingTimeVisual',
+        'logger_name': 'Envir2ndNonWaveTriggerGamingTimeVisual_logger'
+    }
+    ,'PostWaveTriggerChargeVisual': {
+        'app_name': 'PostWaveTriggerChargeVisual',
+        'logger_name': 'PostWaveTriggerChargeVisual_logger'
+    }
+    ,'PostNonWaveTriggerChargeVisual': {
+        'app_name': 'PostNonWaveTriggerChargeVisual',
+        'logger_name': 'PostNonWaveTriggerChargeVisual_logger'
+    }
 }
 
 
@@ -123,7 +163,7 @@ class PostNonWaveTriggerCharge(QuestLocal):
 class WaveTriggerTypeNPlayers(QuestLocal):
     def __init__(self, params, *args, **kwargs) -> None:
         kwargs.update({'PARAMS': PARAMS})
-        super().__init__(params, *args, **kwargs)
+        super().__init__(params, *args, **kwargs)   
 
 class PostWaveTriggerChargeValid(QuestLocal):
     def __init__(self, params, *args, **kwargs) -> None:
@@ -201,6 +241,56 @@ class Envir2ndNonWaveTrigger7DaysFollowUp(QuestLocal):
         super().__init__(params, *args, **kwargs)
 
 class Envir2ndNonWaveTriggerVip(QuestLocal):
+    def __init__(self, params, *args, **kwargs) -> None:
+        kwargs.update({'PARAMS': PARAMS})
+        super().__init__(params, *args, **kwargs)
+
+class EnvirNonWaveTriggerValueVisual(QuestLocal):
+    def __init__(self, params, *args, **kwargs) -> None:
+        kwargs.update({'PARAMS': PARAMS})
+        super().__init__(params, *args, **kwargs)
+
+class EnvirNonWaveTriggerGoldStockVisual(QuestLocal):
+    def __init__(self, params, *args, **kwargs) -> None:
+        kwargs.update({'PARAMS': PARAMS})
+        super().__init__(params, *args, **kwargs)
+
+class EnvirNonWaveTriggerCannonVisual(QuestLocal):
+    def __init__(self, params, *args, **kwargs) -> None:
+        kwargs.update({'PARAMS': PARAMS})
+        super().__init__(params, *args, **kwargs)
+
+class EnvirNonWaveTriggerGamingTimeVisual(QuestLocal):
+    def __init__(self, params, *args, **kwargs) -> None:
+        kwargs.update({'PARAMS': PARAMS})
+        super().__init__(params, *args, **kwargs)
+
+class Envir2ndNonWaveTriggerValueVisual(QuestLocal):
+    def __init__(self, params, *args, **kwargs) -> None:
+        kwargs.update({'PARAMS': PARAMS})
+        super().__init__(params, *args, **kwargs)
+
+class Envir2ndNonWaveTriggerGoldStockVisual(QuestLocal):
+    def __init__(self, params, *args, **kwargs) -> None:
+        kwargs.update({'PARAMS': PARAMS})
+        super().__init__(params, *args, **kwargs)
+
+class Envir2ndNonWaveTriggerCannonVisual(QuestLocal):
+    def __init__(self, params, *args, **kwargs) -> None:
+        kwargs.update({'PARAMS': PARAMS})
+        super().__init__(params, *args, **kwargs)
+
+class Envir2ndNonWaveTriggerGamingTimeVisual(QuestLocal):
+    def __init__(self, params, *args, **kwargs) -> None:
+        kwargs.update({'PARAMS': PARAMS})
+        super().__init__(params, *args, **kwargs)
+
+class PostWaveTriggerChargeVisual(QuestLocal):
+    def __init__(self, params, *args, **kwargs) -> None:
+        kwargs.update({'PARAMS': PARAMS})
+        super().__init__(params, *args, **kwargs)
+
+class PostNonWaveTriggerChargeVisual(QuestLocal):
     def __init__(self, params, *args, **kwargs) -> None:
         kwargs.update({'PARAMS': PARAMS})
         super().__init__(params, *args, **kwargs)
