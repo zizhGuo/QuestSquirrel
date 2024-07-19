@@ -177,7 +177,7 @@ class Visualizer:
             else:
                 try:
                     return visual.plot()
-                except e as Exception:
+                except Exception as e:
                     print('visualizer (chunk level)-> visual.plot() failed: ', e)
             finally:
                 print('-----------------------------------')

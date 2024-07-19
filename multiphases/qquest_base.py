@@ -225,7 +225,7 @@ class QuestTaskBase:
         req_status = _dir['req_status']
         template_file = self.args['template']+'.sql'
         if self.args.get('template_type') and self.args['template_type'] == 'stable':
-            template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,req_status,template_file)
+            template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,'stable',template_file)
         elif self.args.get('template_type') and self.args['template_type'] == 'test_batch':
             template_file = os.path.join(self.args['root_path'],"templates",req_cat,req_iter,'test_batch',template_file)
         elif self.args.get('template_type') and self.args['template_type'] == 'test':
