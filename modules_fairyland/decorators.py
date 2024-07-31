@@ -15,28 +15,37 @@ def retry(max_retries=3, retry_delay=5, exception_to_check=Exception):
                     print(f"Error: {e}, retrying in {retry_delay} seconds...")
                     time.sleep(retry_delay)
                     attempts += 1
-            print("Max retries reached, exiting.")
-            # sys.exit(1)
+                    if attempts >= max_retries:
+                        print("Max retries reached, re-raising the exception.")
+                        raise e
         return wrapper
     return decorator_retry
 
-# def send_email(func, sender_config, error_msg):
-#     @functools.wraps(func)
-#     def wrapper(self, *args, **kwargs):
-#         print('error_msg: ', error_msg)
+def retry_inner_except(max_retries=3, retry_delay=5, exception_to_check=Exception):
+    def decorator_retry(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            attempts = 0
+            while attempts < max_retries:
+                try:
+                    print(f'retrying... now the {attempts + 1} attempts')
+                    return func(*args, **kwargs)
+                except exception_to_check as e:
+                    print('inner except, retrying...')
+                    time.sleep(retry_delay)
+                    attempts += 1
+                    if attempts >= max_retries:
+                        print("Max retries reached, re-raising the exception.")
+                        raise e
+        return wrapper
+    return decorator_retry
 
-#         self.message = config[module.email_module][sub_email]['message']
-#         self.subject = config[module.email_module][sub_email]['subject']
-#         self.header_from = config[module.email_module][sub_email]['header_from']
-#         self.sender_email = config[module.email_module][sub_email]['sender_email']
-#         self.header_to = config[module.email_module][sub_email]['header_to']
-#         self.recipient_show = config[module.email_module][sub_email]['recipient_show']
-#         self.cc_show = config[module.email_module][sub_email]['cc_show']
-#         self.user = config[module.email_module][sub_email]['user']
-#         self.password = config[module.email_module][sub_email]['password']
-#         self.to_addrs = config[module.email_module][sub_email]['to_addrs']
+@retry(max_retries=3, retry_delay=5, exception_to_check=Exception)
+def test_outer_except():
+    raise Exception('test')
 
-
-
-#         func(self, *args, **kwargs)
-#     return wrapper
+if __name__ == '__main__':
+    try:
+        test_outer_except()
+    except Exception as e:
+        print(f'Caught in main: {e}')
