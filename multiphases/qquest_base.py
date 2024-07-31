@@ -29,6 +29,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # 切面方法引用
 from modules_fairyland.decorators import retry
+from modules_fairyland.utils import get_subdirectories
 
 
 # @contextmanager
@@ -126,6 +127,35 @@ class QuestTaskBase:
         if self._spark is None:
             self._spark = self._create_or_get_spark()
         return self._spark
+
+    @contextmanager
+    @retry(max_retries=3, retry_delay=5, exception_to_check=Exception)
+    def get_spark(self):
+        _spark = None
+        try:
+            print('func: get_spark()')
+            _spark = SparkSession.builder \
+                .appName('testapp') \
+                .config("spark.default.parallelism", "2") \
+                .config("spark.driver.memory", "1g") \
+                .config("spark.executor.memory", "2g") \
+                .config("spark.sql.session.timeZone", "UTC") \
+                .getOrCreate()
+            files = get_subdirectories('/data/avid/')
+            print(files)
+            tb2dict = {x.split("/")[-1]:x  for x in files}
+            for k, v in tb2dict.items():
+                df = _spark.read.parquet(v)
+                df.createOrReplaceTempView(k)
+            _spark.sql("show tables").show()
+            _spark.sql("show tables").show()
+            yield _spark
+        except Exception as e:
+            print(f'Exception in get_spark: {e}')
+            raise e
+        finally:
+            if _spark:
+                _spark.stop()
 
     @retry(max_retries=3, retry_delay=5, exception_to_check=Exception)
     def _create_or_get_spark(self):
@@ -264,6 +294,22 @@ class QuestTaskBase:
         result = self.spark.sql(self.sql)
         result.show()
         return result
+
+    @retry(max_retries=3, retry_delay=5, exception_to_check=Exception)
+    def query_v3(self, *args, **kwargs):
+        """
+        默认处理query流程v3
+        """
+        app_name = 'test_name'
+        self.logger.debug(f'started new query_v3 | app name: {app_name}')
+        df = None
+        # with self.get_spark(self.args['app_name']) as spark:
+        # with self.get_spark(PARAMS[self.__class__.__name__]['app_name']) as spark:
+        with self.get_spark() as spark:
+            result = spark.sql(self.sql)
+            result.show()
+            df = result.toPandas()
+        return df
 
     def process_v1(self, result, *args, **kwargs):
         """
