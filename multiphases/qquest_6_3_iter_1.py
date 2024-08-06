@@ -75,6 +75,7 @@ class Envir2Doupo(QuestTaskBase):
 
     def query_and_save(self):
         super().query_and_save()
+        # self.query_and_process_v1(self.query_v3, self.process_v1)
 
 class Envir3Doupo(QuestTaskBase):
     def __init__(self, params, *args, **kwargs) -> None:
@@ -83,6 +84,7 @@ class Envir3Doupo(QuestTaskBase):
 
     def query_and_save(self):
         super().query_and_save()
+        # self.query_and_process_v1(self.query_v3, self.process_v1)
 
 class Envir4Doupo(QuestTaskBase):
     def __init__(self, params, *args, **kwargs) -> None:
@@ -91,6 +93,7 @@ class Envir4Doupo(QuestTaskBase):
 
     def query_and_save(self):
         super().query_and_save()
+        # self.query_and_process_v1(self.query_v3, self.process_v1)
 
 class EnvirLevelFailure(Envir2Doupo):
     def __init__(self, params, *args, **kwargs) -> None:
@@ -99,6 +102,7 @@ class EnvirLevelFailure(Envir2Doupo):
 
     def query_and_save(self):
         super().query_and_save()
+        # self.query_and_process_v1(self.query_v3, self.process_v1)
 
 class BreakthruLevelNonOperate(QuestTaskBase):
     def __init__(self, params, *args, **kwargs) -> None:
@@ -107,3 +111,4 @@ class BreakthruLevelNonOperate(QuestTaskBase):
 
     def query_and_save(self):
         super().query_and_save()
+        # self.query_and_process_v1(self.query_v3, self.process_v1)

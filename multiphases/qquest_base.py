@@ -6,10 +6,23 @@
 作者：郭子谆
 
 更新日期: 20240604
+
+
+query v3: 更新query方法
+增加my_spark方法, 用于管理spark session
+不适用spark为property和懒加载,仅用于query的管理器
+,适配多进程提交,每个进程的资源会被释放
+pros:
+对于任务列表的depend 表不多的任务,不影响
+cons:
+对于基于相同临时表的任务,会重复创建临时表,增加资源消耗
+
+更新日期: 20240801
 """
 
 import os
 import sys
+import gc
 
 import pandas as pd
 import logging
@@ -181,28 +194,21 @@ class QuestTaskBase:
         self._logger.addHandler(console_handler)
         return self._logger
     
-    # def _get_spark(self):
-    #     """
-    #         deprecated
-    #         获取spark session
-    #     """
-    #     try:
-    #         self.logger.debug('_get_spark entered')
-    #         self.logger.debug('try to get spark')
-    #         self.spark = SparkSession.builder \
-    #             .config("spark.executor.instances", "2") \
-    #             .config("spark.executor.cores", "2") \
-    #             .appName(self.args['app_name']) \
-    #             .enableHiveSupport() \
-    #             .getOrCreate()
-    #     except Exception as e:
-    #         self.logger.debug('get spark failed')
-    #         print(e)
-    #         print(traceback.format_exc())
-    #     else:
-    #         self.logger.debug('_get spark successfull')
-    #     finally:
-    #         self.logger.debug('_get_spark done')
+    @contextmanager
+    def my_spark(self):
+        try:
+            _spark = self._create_or_get_spark()
+            _spark.SparkContext.getConf().getAll()
+            yield _spark
+        except Exception as e:
+            self._logger.debug(f'INIT my_spark failed; error: {e}')
+        finally:
+            pass
+            _spark.stop()
+            # _spark.catalog.clearCache()
+            # del _spark
+            # gc.collect()
+
 
     def _stop_spark(self):
         """
@@ -304,6 +310,18 @@ class QuestTaskBase:
         result = self.spark.sql(self.sql)
         result.show()
         return result.toPandas()
+
+    def query_v3(self, *args, **kwargs):
+        """
+        默认处理query流程v3
+        """
+        self.logger.debug(f'started query_v3')
+        df = None
+        with self.my_spark() as spark:
+            result = spark.sql(self.sql).show()
+            result.show()
+            df = result.toPandas()
+        return df
 
     def process_v1(self, result, *args, **kwargs):
         """

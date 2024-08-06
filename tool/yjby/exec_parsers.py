@@ -17,7 +17,7 @@ from modules_fairyland.query import QueryManager_manual
 from main_fairydemon import Module
 
 CONFIG = """
-version: 'v5.8.2'
+version: 'v5.10'
 run_parser: 1
 run_query: 1
 connector:
