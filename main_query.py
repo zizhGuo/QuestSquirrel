@@ -8,7 +8,7 @@ sys.path.insert(1, parent_dir)
 from modules.arguments import parser
 from modules.config import ConfigManager
 from modules.query import QueryManager
-from modules.connector import HiveConnector
+from modules_fairyland.connector import HiveConnector
 from modules.processor import DataProcessor
 from modules.report import ReportGenerator
 from modules.schedular import TaskScheduler
