@@ -1,0 +1,204 @@
+connector:
+  host: "cluster-ip"
+  port: "cluster-port"
+  hive_conf:
+    "hive.resultset.use.unique.column.names": "false"
+    "hive.execution.engine": "spark"
+    "spark.executor.instances": "2"
+    "spark.executor.cores": "2"
+  username: "hadoop"
+  password: "hadoop"
+  auth: "CUSTOM"
+
+test:
+  launch: 0
+  params:
+    end_dt: '2024-04-28'
+    gap_days: 8
+
+steps: 
+  query: 1
+  report: 1
+  visual: 1
+  email: 1
+
+module:
+  connector_module: 'connector'
+  query_module: 'query'
+  report_module: 'report'
+  visual_module: 'visual'
+  email_module: 'email'
+
+# demonstrate spark and hive query tasks
+query:
+  task_spark:
+    type: 'spark'
+    template_type: 'stable'
+    tables: 
+      - [1, 'data/quest_pacific', 'qquest_6_2_iter_1', 'EnvirChurnFisheryActivePacific', 'dws_churn_fishery_active.xlsx', 'na']
+      - [1, 'data/quest_doupo', 'qquest_6_3_iter_1', 'Envir2Doupo', 'dws_envir_task2.xlsx', {'req_cat': "request_6_3", 'req_iter': "iter_1", 'req_status': "stable"}, {'NA': "NA"}]
+      - [1, 'data/quest_doupo', 'qquest_6_3_iter_1', 'Envir3Doupo', 'dws_envir_task3.xlsx', {'req_cat': "request_6_3", 'req_iter': "iter_1", 'req_status': "stable"}, {'NA': "NA"}]
+      - [1, 'data/quest_doupo', 'qquest_6_3_iter_1', 'Envir4Doupo', 'dws_envir_task4.xlsx', {'req_cat': "request_6_3", 'req_iter': "iter_1", 'req_status': "stable"}, {'NA': "NA"}]
+      - [1, 'data/quest_doupo', 'qquest_6_3_iter_1', 'EnvirLevelFailure', 'dws_envir_breakthru_level_failure.xlsx', {'req_cat': "request_6_3", 'req_iter': "iter_1", 'req_status': "stable"}, {'NA': "NA"}]
+      - [1, 'data/quest_doupo', 'qquest_6_3_iter_1', 'BreakthruLevelNonOperate', 'dws_envir_breakthru_level_non_operate.xlsx', {'req_cat': "request_6_3", 'req_iter': "iter_1", 'req_status': "stable"}, {'NA': "NA"}]
+  task_fairy_1:
+    temp_save_path: "data/quest_fairydemon"
+    tasks_num: 8
+    template_names: ['dws_mall_task1', 'dws_mall_task2' ,'dws_mall_task3' ,'dws_mall_task4', 'dws_envir_task1', 'dws_envir_task2', 'dws_envir_task3', 'dws_envir_task4']
+    flags: [1, 1, 1, 1, 1, 1, 1, 1]
+    tables: ['dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx', 'dws_envir_task1.xlsx', 'dws_envir_task2.xlsx', 'dws_envir_task3.xlsx', 'dws_envir_task4.xlsx']
+    info:
+      req_cat: "request_5_1"
+      req_iter: "iter_2"
+      req_status: "stable"
+    params:
+      NA: "NA"
+
+report:
+  report_fairy:
+    desc: '某日报1期-report-正式任务'
+    temp_save_path: "data/quest_fairydemon"
+    output_file: 'quest_fairydemon_result.xlsx'
+    source_tables: [
+      'dws_mall_task1.xlsx'
+      ,'dws_mall_task2.xlsx'
+      ,'dws_mall_task3.xlsx'
+      ,'dws_mall_task4.xlsx'
+      ,'dws_envir_fishery_vip.xlsx'
+      ,'dwd_level_lv_spirit_facts.xlsx'
+      ,'dws_envir_task1.xlsx'
+      ,'dws_envir_task2.xlsx'
+      ,'dws_envir_breakthru_level_non_operate.xlsx'
+      ,'dws_envir_breakthru_level_failure.xlsx'
+      ,'dws_envir_mall_level_interval_consumption.xlsx'
+      ,'dws_envir_task3.xlsx'
+      ,'dws_envir_task4.xlsx'
+      ,'dws_envir_spirit.xlsx'
+      ,'dws_envir_spirit_breakthru.xlsx'
+      ,'dws_envir_breakthru_spirit_non_operate.xlsx'
+      ,'dws_envir_breakthru_spirit_failure.xlsx'
+      ,'dws_envir_mall_spirit_interval_consumption.xlsx'
+      ,'dws_envir_pet.xlsx'
+      ,'dws_envir_pet_breakthru.xlsx'
+    ]
+    worksheet: ['ws1', 'ws2', 'ws3', 'ws4', 'ws14', 'ws15',
+    'ws5', 'ws6', 'ws6',
+    'ws12', 'ws12',
+    'ws11', 'ws11', 'ws7', 'ws8', 'ws8',
+    'ws13', 'ws13',
+    'ws9', 'ws10']
+    ws2title:
+      ws1: '仙魔大陆各模块数据大盘'
+      ws2: '仙魔大陆各礼包模块'
+      ws3: '仙魔各礼包ID TOP10礼包'
+      ws4: '仙魔各模块中礼包ID TOP10礼包'
+      ws5: '每日各境界人数分布情况'
+      ws6: '境界突破情况分布'
+      ws7: '各神识等级人数分布情况'
+      ws8: '神识突破情况分布'
+      ws9: '各灵宠等级人数分布情况'
+      ws10: '灵宠突破情况分布'
+      ws11: '仙魔大陆渔场消耗'
+      ws12: '境界突破仅失败用用户行为分析'
+      ws13: '神识突破仅失败用用户行为分析'
+      ws14: '每日各VIP等级渔场游戏情况分布'
+      ws15: '截止至当日境界与神识等级人数分布'
+    column: ['col1', 'col2', 'col3', 'col4', 'col19', 'col20',
+    'col5', 'col6', 'col13',
+    'col14', 'col17',
+    'col7', 'col8', 'col9', 'col10', 'col15',
+    'col16', 'col18',
+    'col11', 'col12']
+    transform:
+      'dws_envir_breakthru_level_failure.xlsx': ['quest_5_2_iter_1', 'LevelFailureTransform']
+      'dws_envir_breakthru_spirit_failure.xlsx': ['quest_5_2_iter_1', 'SpiritFailureTransform']
+      'dws_envir_mall_spirit_interval_consumption.xlsx': ['quest_5_2_iter_1', 'BreakthruSpiritFailureIntervalConsumption']
+      'dws_envir_mall_level_interval_consumption.xlsx': ['quest_5_2_iter_1', 'BreakthruLevelFailureIntervalConsumption']
+      'dws_envir_fishery_vip.xlsx': ['quest_5_2_iter_1', 'VipFisheryDistribution']
+      'dwd_level_lv_spirit_facts.xlsx': ['quest_5_2_iter_1', 'LevelSpiritPivotTransform']
+    col2names:
+      col1: ['日期', '模块名称', '点券兑换订单数', '点券兑换金额', '仙魔大陆整体订单占比', '仙魔大陆整体金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+      col2: ['日期', '模块名称', '礼包类型', '兑换订单数', '兑换金额', '模块订单占比', '模块兑换金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+      col3: ['日期' ,'序号' ,'礼包名称' ,'礼包类型' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
+      col4: ['日期' ,'模块名称' ,'序号' ,'礼包名称' ,'礼包单价' ,'兑换订单数' , '兑换金额' ,'仙魔大陆总兑换订单占比' ,'仙魔大陆总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
+      col5: ['日期', '境界等级', '境界人数', '各境界人数与前一日对比']
+      col6: ['日期', '境界等级', '经历过对应境界等级总人数', '类型', '操作总次数', '操作总人数']
+      col7: ['日期' ,'总游戏人数' ,'人均游戏时长（分钟）' ,'与前一日对比' ,'总消耗金币' ,'与前一日对比' ,'净分','与前一日对比']
+      col8: ['日期' ,'渔场名称' ,'渔场游戏人数' ,'人均游戏时长（分钟）' ,'与前一日对比' ,'总消耗金币' ,'消耗金币占比' ,'与前一日对比' ,'净分','与前一日对比']
+      col9: ['日期', '神识等级', '神识人数', '各神识人数与前一日对比']
+      col10: ['日期', '神识等级', '经历过对应神识等级总人数', '类型', '操作总次数', '操作总人数']
+      col11: ['日期', '灵宠类型', '灵宠等级', '灵宠人数', '各灵宠人数与前一日对比']
+      col12: ['日期', '灵宠类型', '灵宠等级', '经历过对应灵宠等级总人数', '类型', '操作总次数', '操作总人数']
+      col13: ['日期', '境界等级', '未操作总人数', '活跃未操作人数']
+      col14: ['日期', '境界等级', '失败次数', '失败人数', '总玩家名单', '仅购买了仙魔礼包', '购买了仙魔+常规礼包', '仅购买了常规礼包', '无任何共买记录']
+      col15: ['日期', '神识等级', '未操作总人数', '活跃未操作人数']
+      col16: ['日期', '神识等级','失败次数', '失败人数', '玩家名单']
+      col17: ['日期', '境界等级', '等级名称', '玩家名单', '失败次数', '第几次失败', '失败时消耗材料', '礼包去重序列', '礼包', '购买订单数', '累计订单金额']
+      col18: ['日期', '神识等级', '等级名称', '玩家名单', '失败次数', '第几次失败', '失败时消耗材料', '礼包去重序列', '礼包', '购买订单数', '累计订单金额']
+      col19: ['日期', 'VIP', '所有渔场都玩玩家数', '只常规渔场玩家数', '只玩仙魔玩家数']
+      col20: ['用户id', '境界等级', '神识等级']
+  report_fantasy:
+    desc: '奇幻海域日报1期-report-正式任务'
+    temp_save_path: "data/quest_fantasy"
+    output_file: 'quest_fantasy_result.xlsx'
+    source_tables: [
+      'dws_mall_task1.xlsx'
+      ,'dws_mall_task2.xlsx'
+      ,'dws_mall_task3.xlsx'
+      ,'dws_mall_task4.xlsx'
+    ]
+    worksheet: ['ws1', 'ws2', 'ws3', 'ws4']
+    ws2title:
+      ws1: '奇幻海域各模块数据大盘'
+      ws2: '奇幻海域各礼包模块'
+      ws3: '奇幻海域各礼包ID TOP10礼包'
+      ws4: '奇幻海域各模块中礼包ID TOP10礼包'
+    column: ['col1', 'col2', 'col3', 'col4']
+    # transform:
+    #   'dws_envir_breakthru_level_failure.xlsx': ['quest_5_2_iter_1', 'LevelFailureTransform']
+    #   'dws_envir_breakthru_spirit_failure.xlsx': ['quest_5_2_iter_1', 'SpiritFailureTransform']
+    #   'dws_envir_mall_level_interval_consumption.xlsx': ['quest_5_2_iter_1', 'BreakthruFailureIntervalConsumption']
+    col2names:
+      col1: ['日期', '模块名称', '点券兑换订单数', '点券兑换金额', '奇幻海域整体订单占比', '奇幻海域整体金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+      col2: ['日期', '模块名称', '礼包类型', '兑换订单数', '兑换金额', '模块订单占比', '模块兑换金额占比', '与前一日兑换订单数对比', '与前一日点券兑换金额对比', '与前一日订单数环比', '与前一日兑换金额环比']
+      col3: ['日期' ,'序号' ,'礼包名称' ,'礼包类型' ,'礼包单价' ,'兑换订单数' ,'兑换金额' ,'奇幻海域总兑换订单占比' ,'奇幻海域总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
+      col4: ['日期' ,'模块名称' ,'序号' ,'礼包名称' ,'礼包单价' ,'兑换订单数' , '兑换金额' ,'奇幻海域总兑换订单占比' ,'奇幻海域总兑换金额占比' ,'与前一日兑换订单数对比' ,'与前一日点券兑换金额对比' ,'与前一日订单数环比' ,'与前一日兑换金额环比']
+
+visual:
+  Fairy:
+    output_file: 'quest_fairydemon_visual.html'
+    temp_save_path: "data/quest_fairydemon"
+    title: '某游戏-仙魔大陆商城图示'
+    visualizer: 
+      - [1, 'vquest_5_1_iter_1', 'FairydemonMall', 'dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx']
+      - [1, 'vquest_5_2_iter_1', 'VipFisheryDistributionVis', 'dws_envir_fishery_vip.xlsx']
+  Fantasy:
+    output_file: 'quest_fantasy_visual.html'
+    temp_save_path: "data/quest_fantasy"
+    title: '某游戏-奇幻海域商城图示'
+    visualizer: 
+      - [1, 'vquest_5_2_iter_1', 'FantasyMall', 'dws_mall_task1.xlsx', 'dws_mall_task2.xlsx', 'dws_mall_task3.xlsx', 'dws_mall_task4.xlsx'] 
+
+email:
+  email1:
+    desc: 'email-正式邮件'
+    message: "
+      message for test"
+    subject: "report subject"
+    header_from: "indolent panda"
+    sender_email: "panda@example.com"
+    header_to: "polar bear"
+    recipient_show: "polar-bear@example.com"
+    cc_show: "lion@example.com"
+    # cc_show: ""
+    user: "panda@example.com"
+    password: "examplepassword"
+    to_addrs: "polar-bear@example.com"
+    email_company: "qq"
+    attachment_file_read_save: 
+      "data/quest_fairydemon":
+        - ['quest_fairydemon_result.xlsx', '仙魔大陆商城&生态日报.xlsx']
+        - ['quest_fairydemon_visual.html', '仙魔大陆商城图示.html']
+      "data/quest_fantasy":
+        - ['quest_fantasy_result.xlsx', '奇幻海域商城日报.xlsx']
+        - ['quest_fantasy_visual.html', '奇幻海域商城图示.html']
